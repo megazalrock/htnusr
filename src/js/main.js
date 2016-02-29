@@ -1,5 +1,3 @@
-import $ from 'jquery';
-import _ from 'lodash';
 import React from 'react';
 import ReactDom from 'react-dom';
 import Feed from './components/Feed';

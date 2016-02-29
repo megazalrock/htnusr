@@ -1,22 +1,114 @@
-.feedItem{
-	&.view-title{
-		.html, .text{
-			display: none
+@import 'reset';
+@baseMargin: 0.5rem;
+html, body{
+	font-size: 16px;
+}
+
+.app{
+	padding: @baseMargin;
+}
+
+.ui{
+	display: flex;
+	flex-flow:row wrap;
+    justify-content: flex-end;
+	.btnBox{
+   		flex: 0 0 auto;
+  		margin-bottom: @baseMargin;
+		&.viewMode{
 		}
 	}
-	&.view-text{
-		.html{
-			display: none;
+	.btn{
+		@btnSelectedBgColor: #008ede;
+		@btnSelectedFontColor: #FFF;
+		@btnBgColor: #EEE;
+		@btnFontColor: #333;
+		@btnAnimeDuration: 200ms;
+
+		@btnShadowColor: rgba(0, 0, 0, 0.5);
+
+		@height: 32px;
+		font-size: 16px;
+		display: inline-block;
+		height: @height;
+		line-height: @height;
+		padding: 0 0.5em;
+		text-align: center;
+		cursor: pointer;
+		background: @btnBgColor;
+		color: @btnFontColor;
+		box-shadow: 0px 0px 0px @btnShadowColor;
+		@keyframes btnHover{
+			from{
+				box-shadow: 0px 0px 0px @btnShadowColor;
+				//background-color: @btnBgColor;
+			}
+			to{
+				box-shadow: 0px 0px 5px @btnShadowColor;
+				//background-color: lighten(@btnBgColor, 1%);
+			}
+		}
+
+		&:hover{
+			z-index: 3;
+			animation: btnHover @btnAnimeDuration ease-out;
+			animation-fill-mode: forwards;
+		}
+		&.selected{
+			z-index: 2;
+			box-shadow: 0px 0px 5px @btnShadowColor;
+			@keyframes selectedBtnHover{
+				from{
+					//background-color: @btnSelectedBgColor;
+				}
+				to{
+					//background-color: lighten(@btnSelectedBgColor, 10%);
+				}
+			}
+			//animation: selectedBtnHover 0.2s ease-out reverse;
+			background: @btnSelectedBgColor;
+			color: @btnSelectedFontColor;
+			&:hover{
+				animation: selectedBtnHover @btnAnimeDuration ease-out;
+				animation-fill-mode: forwards;
+				//background-color: lighten(@btnSelectedBgColor, 10%);
+			}
 		}
 	}
-	&.view-html{
-		.title, .text{
-			display: none
+}
+.feedList{
+	.feedItem{
+		&.view-title{
+			.html, .text{
+				display: none
+			}
 		}
-	}
-	.footer{
-		.score{
-			
+		&.view-text{
+			.html{
+				display: none;
+			}
+		}
+		&.view-html{
+			.title, .text{
+				display: none
+			}
+		}
+		.footer{
+			font-size: 12px;
+			.score{
+				color: #FFF;
+				display: inline-block;
+				line-height: 1;
+				padding: 2px 4px;
+				@s: 50%;
+				@l: 45%;
+				&.minus{
+					background: hsl(0, @s, @l, 0);
+				}
+				&.plus{
+					background: hsl(100, @s, @l, 0);
+				}
+			}
 		}
 	}
 }

@@ -1,5 +1,4 @@
 import $ from 'jquery';
-import _ from 'lodash';
 export default class Users {
 	addUsers(data){
 		var deferred = $.Deferred();
@@ -31,7 +30,7 @@ export default class Users {
 			}
 		})
 		.done((score) =>{
-			deferred.resolve(score - data.bookmarkCount);
+			deferred.resolve(score);
 		})
 		.fail((...args) => {
 			deferred.reject(...args);

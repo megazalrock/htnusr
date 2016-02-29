@@ -42,6 +42,9 @@ Class DataBase{
 				$sth = $dbh->prepare('INSERT INTO ' . $this->statistics_table_name . ' (`key`) VALUES (:key)');
 				$sth->bindValue(':key', 'std', PDO::PARAM_STR);
 				$sth->execute();
+				$sth = $dbh->prepare('INSERT INTO ' . $this->statistics_table_name . ' (`key`) VALUES (:key)');
+				$sth->bindValue(':key', 'max', PDO::PARAM_STR);
+				$sth->execute();
 			}
 		}catch(PDOException $e){
 			die($e->getMessage());

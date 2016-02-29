@@ -53,8 +53,8 @@ class Users extends DataBase{
 		}
 	}
 
-	public function update_users(){
-		$queue_list = $this->get_queue_list();
+	public function update_users($limit = 100){
+		$queue_list = $this->get_queue_list($limit);
 		foreach ($queue_list as $userid) {
 			$this->update_user($userid);
 		}
@@ -83,9 +83,20 @@ class Users extends DataBase{
 		$sth->bindValue(':value', $std, PDO::PARAM_INT);
 		$sth->execute();
 
+		//max
+		$sth = $dbh->prepare('SELECT MAX(score_log10) FROM ' . $this->user_table_name . ' WHERE score >= 0');
+		$sth->execute();
+		$max = $sth->fetchAll(PDO::FETCH_COLUMN);
+		$max = $max[0];
+		$sth = $dbh->prepare('UPDATE ' . $this->statistics_table_name . ' SET `value`=:value WHERE `key`=:key');
+		$sth->bindValue(':key', 'max', PDO::PARAM_STR);
+		$sth->bindValue(':value', $max, PDO::PARAM_INT);
+		$sth->execute();
+
 		return array(
 			'avg' => $avg,
-			'std' => $std
+			'std' => $std,
+			'max' => $max
 		);
 	}
 
@@ -123,7 +134,8 @@ class Users extends DataBase{
 		foreach ($users_list as $user) {
 			//$case[] = 'WHEN `' . $user['name'] . '` THEN `' . (($statics['avg'] - $user['score']) / $statics['std'] * 10 + 50 . '`');
 			//$case[] = 'WHEN `' . $user['name'] . '` THEN `100`';
-			$karma = (($user['score_log10'] - $statics['avg']) / $statics['std']) * 10 + 50;
+			//$karma = (($user['score_log10'] - $statics['avg']) / $statics['std']) * 10 + 50;
+			$karma = ($user['score_log10'] - sqrt($statics['max']));
 
 			try{
 				$dbh = $this->connection();
@@ -145,7 +157,7 @@ class Users extends DataBase{
 		foreach ($users as $userid) {
 			$query_where[]= '?';
 		}
-		$query = 'SELECT SUM(score_log10) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . '))';
+		$query = 'SELECT SUM(karma) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . '))';
 		try{	
 			$dbh = $this->connection();
 			$sth = $dbh->prepare($query);

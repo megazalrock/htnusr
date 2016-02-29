@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import React from 'react';
-import ReactDom from 'react-dom';
 import Xml2js from 'xml2js';
 import FeedItem from './FeedItem';
 import Users from '../Users';
@@ -21,7 +20,7 @@ export default class Feed extends React.Component{
 			new: []
 		};
 	}
-	
+
 	componentDidMount(){
 		this._getRss(this.state.mode);
 	}
@@ -47,6 +46,7 @@ export default class Feed extends React.Component{
 						var deferred = $.Deferred();
 						hatena.getUsers(item.link[0])
 							.then((data) => {
+								users.addUsers(data);
 								return users.getScore(data);
 							})
 							.then((score) => {
@@ -114,19 +114,19 @@ export default class Feed extends React.Component{
 			);
 		});
 		return(
-			<div className="feedList">
+			<div className="app">
 				<div className="ui">
-					<div className="feedType">
-						<div className="hotentry" onClick={this.setFeedType.bind(this, 'hotentry')}>人気</div>
-						<div className="new" onClick={this.setFeedType.bind(this, 'new')}>新着</div>
+					<div className="feedType btnBox">
+						<div className={'hotentry btn' + (this.state.mode === 'hotentry' ? ' selected' : '')} onClick={this.setFeedType.bind(this, 'hotentry')}>人気</div>
+						<div className={'new btn' + (this.state.mode === 'new' ? ' selected' : '')} onClick={this.setFeedType.bind(this, 'new')}>新着</div>
 					</div>
-					<div className="viewMode">
-						<div className="title" onClick={this.setViewMode.bind(this, 'title')}>タイトルのみ</div>
-						<div className="text" onClick={this.setViewMode.bind(this, 'text')}>簡易表示</div>
-						<div className="html" onClick={this.setViewMode.bind(this, 'html')}>HTML表示</div>
+					<div className="viewMode btnBox">
+						<div className={'title btn' + (this.state.viewMode === 'title' ? ' selected' : '')} onClick={this.setViewMode.bind(this, 'title')}>タイトルのみ</div>
+						<div className={'text btn' + (this.state.viewMode === 'text' ? ' selected' : '')} onClick={this.setViewMode.bind(this, 'text')}>簡易表示</div>
+						<div className={'html btn' + (this.state.viewMode === 'html' ? ' selected' : '')} onClick={this.setViewMode.bind(this, 'html')}>HTML表示</div>
 					</div>
 				</div>
-				<div className="list">
+				<div className="feedList">
 					{feedList}
 				</div>
 			</div>

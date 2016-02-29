@@ -9,7 +9,7 @@ foreach ($user_list as $userid) {
 	$users->add_user($userid);
 }*/
 //$users->update_users();
-var_dump($users->update_users());
+var_dump($users->update_users(100));
 //var_dump($users->update_users());
 /*$users = $_REQUEST['users'];
 $result = 0;
