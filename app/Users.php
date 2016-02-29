@@ -102,7 +102,7 @@ class Users extends DataBase{
 		return $statics;
 	}
 
-	private function get_users_score(){
+	private function get_users_data(){
 		try{
 			$dbh = $this->connection();
 			//score
@@ -117,9 +117,8 @@ class Users extends DataBase{
 	}
 
 	private function update_users_karma(){
-		
 		$statics = $this->update_statics();
-		$users_list = $this->get_users_score();
+		$users_list = $this->get_users_data();
 		$case = array();
 		foreach ($users_list as $user) {
 			//$case[] = 'WHEN `' . $user['name'] . '` THEN `' . (($statics['avg'] - $user['score']) / $statics['std'] * 10 + 50 . '`');
@@ -135,6 +134,29 @@ class Users extends DataBase{
 			}catch(PDOException $e){
 				echo $e->getMessage();
 			}
+		}
+	}
+
+	public function get_users_score($users){
+		if(!is_array($users) && is_string($users)){
+			$users = array($users);
+		}
+		$query_where = array();
+		foreach ($users as $userid) {
+			$query_where[]= '?';
+		}
+		$query = 'SELECT SUM(score_log10) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . '))';
+		try{	
+			$dbh = $this->connection();
+			$sth = $dbh->prepare($query);
+			foreach ($users as $key => $userid) {
+				$sth->bindValue($key + 1, $userid, PDO::PARAM_STR);
+			}
+			$sth->execute();
+			$result = $sth->fetchAll(PDO::FETCH_COLUMN);
+			return $result[0];
+		}catch(PDOException $e){
+			echo $e->getMessage();
 		}
 	}
 

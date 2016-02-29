@@ -1,29 +1,24 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import Hatena from './Hatena';
-import Score from './Score';
+import React from 'react';
+import ReactDom from 'react-dom';
+import Feed from './components/Feed';
 
-var $form = $('#form');
-var $input = $form.find('input');
-$form.find('button')
-	.on('click', function () {
-		var hatena = new Hatena();
-		hatena.getUsers($input.val())
-			.then((res) => {
-				var score = new Score();
-				/*var users = (() => {
-					var array = [];
-					_.forEach(res.users, (user) => {
-						array.push('"' + user + '"');
-					});
-					return array;
-				})();
-				var result = 'array(' + users.join(',') +  ')';
-				$('#result').html(result);*/
-				//console.log(res);
-				return score.getScore(res);
-			})
-			.then((score) => {
-				console.log(score);
-			});
-	});
+class BetterHotentry{
+	constructor(){
+		this.rssUrls = {
+			hotentry: 'http://feeds.feedburner.com/hatena/b/hotentry',//'http://b.hatena.ne.jp/hotentry?mode=rss',//http://feeds.feedburner.com/hatena/b/hotentry
+			new: 'http://b.hatena.ne.jp/entrylist?mode=rss'
+		};
+	}
+
+	init(){
+		ReactDom.render(
+			<Feed rssUrls={this.rssUrls}/>,
+			document.getElementById('container')
+		);
+	}
+}
+
+var main = new BetterHotentry();
+main.init();

@@ -5,7 +5,10 @@
   "main": "index.js",
   "dependencies": {
     "jquery": "^2.2.1",
-    "lodash": "^4.5.1"
+    "lodash": "^4.5.1",
+    "react": "^0.14.7",
+    "react-dom": "^0.14.7",
+    "xml2js": "^0.4.16"
   },
   "devDependencies": {
     "babel": "^6.3.26",
