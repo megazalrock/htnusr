@@ -1,17 +1,19 @@
 @import 'reset';
 @baseMargin: 0.5rem;
 html, body{
-	font-size: 16px;
+	font-size: 15px;
 }
 
 .app{
 	padding: @baseMargin;
+	max-width: 800px;
+	margin: 0 auto;
 }
 
 .ui{
 	display: flex;
 	flex-flow:row wrap;
-    justify-content: flex-end;
+    justify-content: space-between;
 	.btnBox{
    		flex: 0 0 auto;
   		margin-bottom: @baseMargin;
@@ -27,8 +29,8 @@ html, body{
 
 		@btnShadowColor: rgba(0, 0, 0, 0.5);
 
-		@height: 32px;
-		font-size: 16px;
+		@height: 36px;
+		font-size: 0.9rem;
 		display: inline-block;
 		height: @height;
 		line-height: @height;
@@ -78,9 +80,83 @@ html, body{
 }
 .feedList{
 	.feedItem{
+		margin-top: @baseMargin * 2;
+		padding-bottom: @baseMargin * 2;
+		border-bottom: 1px solid #CCC;
+		word-wrap: break-word;
+		&:first-child{
+			margin-top: 0;
+		}
+		&:last-child{
+			border: none;
+		}
+		.html{
+			blockquote{
+				p:last-child{
+					display: none;
+				}
+			}	
+		}
+		.title{
+			font-size: 1.2rem;
+			margin:@baseMargin 0;
+			line-height: 1;
+			a{
+				text-decoration: none;
+				&:hover{
+					text-decoration: underline;
+				}
+			}
+
+
+		}
+		.footer{
+			font-size: 11px;
+			.score,
+			.category,
+			.date,
+			.bookmarkCount{
+				@height: 14px;
+				display: inline-block;
+				line-height: @height;
+				height: @height;
+				padding: 2px 4px;
+			}
+			.bookmarkCount{
+				color: #ff2d2d;
+				font-weight: bold;
+				background: #fdd;
+				.count{
+					font-size: 110%;
+				}
+				&:hover{
+					text-decoration: none;
+				}
+			}
+			.score{
+				color: #FFF;
+				@s: 50%;
+				@l: 45%;
+				&.minus{
+					background: hsl(0, @s, @l, 0);
+				}
+				&.plus{
+					background: hsl(100, @s, @l, 0);
+				}
+			}
+			.category{
+				background: #EEE;
+			}
+		}
 		&.view-title{
+			margin-top: @baseMargin;
+			padding-bottom: @baseMargin;
 			.html, .text{
 				display: none
+			}
+			.title{
+				margin-bottom: 0;
+				font-size: 1rem;
 			}
 		}
 		&.view-text{
@@ -91,23 +167,6 @@ html, body{
 		&.view-html{
 			.title, .text{
 				display: none
-			}
-		}
-		.footer{
-			font-size: 12px;
-			.score{
-				color: #FFF;
-				display: inline-block;
-				line-height: 1;
-				padding: 2px 4px;
-				@s: 50%;
-				@l: 45%;
-				&.minus{
-					background: hsl(0, @s, @l, 0);
-				}
-				&.plus{
-					background: hsl(100, @s, @l, 0);
-				}
 			}
 		}
 	}
