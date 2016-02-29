@@ -4,7 +4,7 @@ export default class Score {
 	getScore(data){
 		var promise = new Promise((resolve, reject) => {
 			$.ajax({
-				url:'user_score.php',
+				url:'add_users.php',
 				dataType: 'text',
 				type: 'post',
 				data: {

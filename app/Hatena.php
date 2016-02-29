@@ -9,11 +9,7 @@ class HatenaAPI{
 		$scores[] = self::get_hateb_user_star($userid);
 		$result = 0;
 		foreach ($scores as $score) {
-			$_score = log($score, 10);
-			if($_score <= 0){
-				$_score = 0;
-			}
-			$result += $_score;
+			$result += $score;
 		}
 		return $result;
 	}
