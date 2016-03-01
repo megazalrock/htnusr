@@ -25,16 +25,16 @@ class Users extends DataBase{
 		$last_updated = time();
 		try{
 			$dbh = $this->connection();
-			$sth = $dbh->prepare('UPDATE ' . $this->user_table_name . ' SET score=:score, score_log10=:score_log10, last_updated=:last_updated, priority=:priority, star_yellow=:star_yellow, star_green=:star_green, star_red=:star_red, star_blue=:star_blue, star_purple=:star_purple WHERE name=:userid');
+			$sth = $dbh->prepare('UPDATE ' . $this->user_table_name . ' SET last_updated=:last_updated, priority=:priority, star_yellow=:star_yellow, star_green=:star_green, star_red=:star_red, star_blue=:star_blue, star_purple=:star_purple WHERE name=:userid');
 			$sth->bindValue(':priority', 0, PDO::PARAM_INT);
 			$sth->bindParam(':userid', $userid, PDO::PARAM_STR);
-			$sth->bindParam(':score', $star_count['score'], PDO::PARAM_STR);
+			//$sth->bindParam(':score', $star_count['score'], PDO::PARAM_STR);
 			$sth->bindParam(':star_yellow', $star_count['yellow'], PDO::PARAM_INT);
 			$sth->bindParam(':star_green', $star_count['green'], PDO::PARAM_INT);
 			$sth->bindParam(':star_red', $star_count['red'], PDO::PARAM_INT);
 			$sth->bindParam(':star_blue', $star_count['blue'], PDO::PARAM_INT);
 			$sth->bindParam(':star_purple', $star_count['purple'], PDO::PARAM_INT);
-			$sth->bindParam(':score_log10', $score_log10, PDO::PARAM_STR);
+			//$sth->bindParam(':score_log10', $score_log10, PDO::PARAM_STR);
 			$sth->bindParam(':last_updated', $last_updated, PDO::PARAM_INT);
 			$result = $sth->execute();
 			return $result;
@@ -68,6 +68,7 @@ class Users extends DataBase{
 	}
 
 	private function update_statics(){
+		$this->update_users_score();
 		$dbh = $this->connection();
 		//avg
 		$sth = $dbh->prepare('SELECT AVG(score_log10) FROM ' . $this->user_table_name . ' WHERE score_log10 >= 0');
@@ -144,7 +145,7 @@ class Users extends DataBase{
 		try{
 			$dbh = $this->connection();
 			//score
-			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name . ' WHERE score >= 0');
+			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name);
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
 			return $result;
@@ -179,6 +180,25 @@ class Users extends DataBase{
 				echo $e->getMessage();
 			}
 		}
+	}
+
+	private function update_users_score(){
+		$users_list = $this->get_users_data();
+		foreach ($users_list as $user) {
+			$score = ($user['star_yellow'] / 100) + $user['star_green'] + $user['star_blue'] + $user['star_purple'];
+			$score_log10 = log($score, 10);
+			try{
+				$dbh = $this->connection();
+				$sth = $dbh->prepare('UPDATE ' . $this->user_table_name . ' SET score=:score, score_log10=:score_log10 WHERE name=:name');
+				$sth->bindParam(':score', $score, PDO::PARAM_INT);
+				$sth->bindParam(':score_log10', $score_log10, PDO::PARAM_INT);
+				$sth->bindParam(':name', $user['name'], PDO::PARAM_INT);
+				$sth->execute();
+			}catch(PDOException $e){
+				echo $e->getMessage();
+			}
+		}
+
 	}
 
 	public function get_users_score($users){
