@@ -101,7 +101,7 @@ class Users extends DataBase{
 
 		//median
 		$sth = $dbh->prepare(
-			'SELECT score_log10 FROM ' . $this->user_table_name . ' WHERE score_log10 >= 0 ORDER BY score_log10'
+			'SELECT score_log10 FROM ' . $this->user_table_name . ' WHERE score_log10 > 0 ORDER BY score_log10'
 		);
 		$sth->execute();
 		$score_log10_list = $sth->fetchAll(PDO::FETCH_COLUMN);
@@ -185,7 +185,7 @@ class Users extends DataBase{
 	private function update_users_score(){
 		$users_list = $this->get_users_data();
 		foreach ($users_list as $user) {
-			$score = ($user['star_yellow'] / 100) + $user['star_green'] + $user['star_blue'] + $user['star_purple'];
+			$score = $user['star_green'] * 2 + $user['star_red'] * 4 + $user['star_blue'] * 25 + $user['star_purple'] * 256;
 			$score_log10 = log($score, 10);
 			try{
 				$dbh = $this->connection();

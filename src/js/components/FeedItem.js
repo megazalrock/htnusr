@@ -21,7 +21,7 @@ export default class FeedItem extends React.Component{
 			this.users.getUsers(this.props.data.link)
 				.then((data) => {
 					//if(this.props.mode === 'hotentry'){
-						this.users.addUsers(data);
+					this.users.addUsers(data);
 					//}
 					this.setState({bookmarkCount: data.bookmarkCount});
 					return this.users.getScore(data);
@@ -41,7 +41,7 @@ export default class FeedItem extends React.Component{
 	}
 
 	render(){
-		var date = new Date(this.props.data.date);
+		var date = new Date(this.props.data.date * 1000);
 		var bookmarkUrl = 'http://b.hatena.ne.jp/entry/' + (this.props.data.link.match(/^https/) ? 's/' : '') + this.props.data.link.replace(/^https?:\/\//, '');
 		return(
 			<div className={'feedItem view-' + this.props.viewMode}>
