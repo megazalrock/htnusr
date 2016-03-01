@@ -15,16 +15,20 @@ Class DataBase{
 			if(!in_array('users', $tables)){
 				$sth = $dbh->prepare(
 					"CREATE TABLE `users` (
-						`id` int(11) unsigned NOT NULL AUTO_INCREMENT,
 						`name` tinytext NOT NULL,
 						`karma` float DEFAULT NULL,
-						`score` int(11) DEFAULT NULL,
+						`score` float DEFAULT NULL,
 						`score_log10` float DEFAULT NULL,
 						`last_updated` int(11) DEFAULT NULL,
 						`priority` varchar(255) NOT NULL DEFAULT '0',
-						PRIMARY KEY (`id`),
-						UNIQUE KEY `Unique` (`name`(32))
-					) ENGINE=InnoDB AUTO_INCREMENT=820 DEFAULT CHARSET=utf8;"
+						`star_yellow` int(11) DEFAULT NULL,
+						`star_green` int(11) DEFAULT NULL,
+						`star_red` int(11) DEFAULT NULL,
+						`star_blue` int(11) DEFAULT NULL,
+						`star_purple` int(11) DEFAULT NULL,
+						PRIMARY KEY (`name`(32)),
+						UNIQUE KEY `UNIQUE` (`name`(32))
+					) ENGINE=InnoDB DEFAULT CHARSET=utf8;"
 				);
 				$sth->execute();
 			}
@@ -80,6 +84,9 @@ Class DataBase{
 				$sth->execute();
 				$sth = $dbh->prepare('INSERT INTO ' . $this->statistics_table_name . ' (`key`) VALUES (:key)');
 				$sth->bindValue(':key', 'max', PDO::PARAM_STR);
+				$sth->execute();
+				$sth = $dbh->prepare('INSERT INTO ' . $this->statistics_table_name . ' (`key`) VALUES (:key)');
+				$sth->bindValue(':key', 'median', PDO::PARAM_STR);
 				$sth->execute();
 			}
 		}catch(PDOException $e){

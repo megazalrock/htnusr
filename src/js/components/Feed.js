@@ -1,18 +1,16 @@
 import $ from 'jquery';
-import _ from 'lodash';
 import React from 'react';
-import Xml2js from 'xml2js';
 import FeedItem from './FeedItem';
-import Users from '../Users';
-import Hatena from '../Hatena';
+
+const strage = window.localStorage;
 
 export default class Feed extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {
 			feed: [],
-			mode: 'hotentry',
-			viewMode: 'text'
+			mode: strage.getItem('mode') || 'hotentry',
+			viewMode: strage.getItem('viewMode') ||'text'
 		};
 		this.cache = {
 			experiod: Date.now(),
@@ -34,31 +32,12 @@ export default class Feed extends React.Component{
 				},
 				dataType: 'json'
 			})
-			.then((res) =>{
-				var promises = [];
-				_.forEach(res, (item) => {
-					var users = new Users();
-					var hatena = new Hatena();
-					var deferred = $.Deferred();
-					hatena.getUsers(item.link)
-						.then((data) => {
-							users.addUsers(data);
-							return users.getScore(data);
-						})
-						.then((score) => {
-							item.score = score;
-							deferred.resolve(item);
-						});
-					promises.push(deferred.promise());
+			.then((res) =>{	
+				this.setState({
+					feed: res
 				});
-				$.when(...promises)
-					.then((...items) => {
-						this.setState({
-							feed: items
-						});
-						this.cache.experiod = Date.now();
-						this.cache[mode] = items;
-					});
+				this.cache.experiod = Date.now();
+				this.cache[mode] = res;
 			});
 		}else{
 			this.setState({
@@ -72,6 +51,7 @@ export default class Feed extends React.Component{
 			this.setState({
 				viewMode: mode
 			});
+			strage.setItem('viewMode', mode);
 		}
 	}
 
@@ -81,13 +61,14 @@ export default class Feed extends React.Component{
 				mode: mode
 			});
 			this._getRss(mode);
+			strage.setItem('mode', mode);
 		}
 	}
 
 	render(){
-		var feedList = this.state.feed.map((item, i)=>{
+		var feedList = this.state.feed.map((item)=>{
 			return (
-				<FeedItem key={i} data={item} viewMode={this.state.viewMode} />
+				<FeedItem key={item.id} data={item} mode={this.state.mode} viewMode={this.state.viewMode} device={this.props.uaparser.getDevice()} />
 			);
 		});
 		return(

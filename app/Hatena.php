@@ -5,29 +5,26 @@ class HatenaAPI{
 	const HATEB_USER_PAGE = 'http://b.hatena.ne.jp/%s/';
 	const HATEB_API = 'http://b.hatena.ne.jp/entry/jsonlite/?url=%s';
 
-	static function get_hateb_user_score($userid){
-		$scores[] = self::get_hateb_user_star($userid);
-		$result = 0;
-		foreach ($scores as $score) {
-			$result += $score;
-		}
-		return $result;
-	}
-
-	static function get_hateb_score($url){		
+	public function get_hateb_score($url){		
 		$json = @file_get_contents(sprintf(self::HATEB_API, $url));
-		var_dump(sprintf(self::HATEB_API, $url));
 		if($json === false){
 			return false;
 		}
 		$json = json_decode($json, true);
 	}
 
-	private function get_hateb_user_star($userid){
+	public function get_hateb_user_star($userid){
 		try{
 			$json = @file_get_contents(sprintf(self::STAR_API, rawurlencode(sprintf(self::HATEB_USER_PAGE, $userid))));
 			$json = json_decode($json, true);
-			return (int) self::calc_star($json['count']);
+			return array(
+				'score' => (float) self::calc_star($json['count']) + 1,
+				'purple' => (int) $json['count']['purple'],
+				'blue' => (int) $json['count']['blue'],
+				'red' => (int) $json['count']['red'],
+				'green' => (int) $json['count']['green'],
+				'yellow' => (int) $json['count']['yellow']
+			);
 		}catch(Exception $e){
 			return 0;
 		}
@@ -54,7 +51,7 @@ class HatenaAPI{
 					$result += $count * 2;
 				break;
 				default:
-					$result += $count;
+					$result += ($count / 100);
 				break;
 			}
 		}

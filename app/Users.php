@@ -17,18 +17,23 @@ class Users extends DataBase{
 	}
 
 	private function update_user($userid){
-		$score = HatenaAPI::get_hateb_user_score($userid);
-		$score_log10 = log($score, 10);
+		$star_count = HatenaAPI::get_hateb_user_star($userid);
+		$score_log10 = log($star_count['score'], 10);
 		if($score_log10 < 0){
 			$score_log10 = 0;
 		}
 		$last_updated = time();
 		try{
 			$dbh = $this->connection();
-			$sth = $dbh->prepare('UPDATE ' . $this->user_table_name . ' SET score=:score, score_log10=:score_log10, last_updated=:last_updated, priority=:priority WHERE name=:userid');
+			$sth = $dbh->prepare('UPDATE ' . $this->user_table_name . ' SET score=:score, score_log10=:score_log10, last_updated=:last_updated, priority=:priority, star_yellow=:star_yellow, star_green=:star_green, star_red=:star_red, star_blue=:star_blue, star_purple=:star_purple WHERE name=:userid');
 			$sth->bindValue(':priority', 0, PDO::PARAM_INT);
 			$sth->bindParam(':userid', $userid, PDO::PARAM_STR);
-			$sth->bindParam(':score', $score, PDO::PARAM_STR);
+			$sth->bindParam(':score', $star_count['score'], PDO::PARAM_STR);
+			$sth->bindParam(':star_yellow', $star_count['yellow'], PDO::PARAM_INT);
+			$sth->bindParam(':star_green', $star_count['green'], PDO::PARAM_INT);
+			$sth->bindParam(':star_red', $star_count['red'], PDO::PARAM_INT);
+			$sth->bindParam(':star_blue', $star_count['blue'], PDO::PARAM_INT);
+			$sth->bindParam(':star_purple', $star_count['purple'], PDO::PARAM_INT);
 			$sth->bindParam(':score_log10', $score_log10, PDO::PARAM_STR);
 			$sth->bindParam(':last_updated', $last_updated, PDO::PARAM_INT);
 			$result = $sth->execute();
@@ -65,7 +70,7 @@ class Users extends DataBase{
 	private function update_statics(){
 		$dbh = $this->connection();
 		//avg
-		$sth = $dbh->prepare('SELECT AVG(score_log10) FROM ' . $this->user_table_name . ' WHERE score >= 0');
+		$sth = $dbh->prepare('SELECT AVG(score_log10) FROM ' . $this->user_table_name . ' WHERE score_log10 >= 0');
 		$sth->execute();
 		$avg = $sth->fetchAll(PDO::FETCH_COLUMN);
 		$avg = $avg[0];
@@ -74,7 +79,7 @@ class Users extends DataBase{
 		$sth->bindValue(':value', $avg, PDO::PARAM_INT);
 		$sth->execute();
 		//std
-		$sth = $dbh->prepare('SELECT STD(score_log10) FROM ' . $this->user_table_name . ' WHERE score >= 0');
+		$sth = $dbh->prepare('SELECT STD(score_log10) FROM ' . $this->user_table_name . ' WHERE score_log10 >= 0');
 		$sth->execute();
 		$std = $sth->fetchAll(PDO::FETCH_COLUMN);
 		$std = $std[0];
@@ -84,7 +89,7 @@ class Users extends DataBase{
 		$sth->execute();
 
 		//max
-		$sth = $dbh->prepare('SELECT MAX(score_log10) FROM ' . $this->user_table_name . ' WHERE score >= 0');
+		$sth = $dbh->prepare('SELECT MAX(score_log10) FROM ' . $this->user_table_name . ' WHERE score_log10 >= 0');
 		$sth->execute();
 		$max = $sth->fetchAll(PDO::FETCH_COLUMN);
 		$max = $max[0];
@@ -93,10 +98,32 @@ class Users extends DataBase{
 		$sth->bindValue(':value', $max, PDO::PARAM_INT);
 		$sth->execute();
 
+		//median
+		$sth = $dbh->prepare(
+			'SELECT score_log10 FROM ' . $this->user_table_name . ' WHERE score_log10 >= 0 ORDER BY score_log10'
+		);
+		$sth->execute();
+		$score_log10_list = $sth->fetchAll(PDO::FETCH_COLUMN);
+		$score_log10_list = array_unique($score_log10_list);
+		$score_log10_list = array_merge(array_diff($score_log10_list, array("")));
+		unset($score_log10_list[0]);
+		unset($score_log10_list[count($score_log10_list) - 1]);
+		$score_log10_list = array_merge(array_diff($score_log10_list, array("")));
+		if(count($score_log10_list) % 2 === 0){
+			$median = ($score_log10_list[ floor((count($score_log10_list) / 2) - 1) ] + $score_log10_list[ floor((count($score_log10_list) / 2)) ]) / 2;
+		}else{
+			$median = $score_log10_list[ floor(count($score_log10_list) / 2) ];
+		}
+		$sth = $dbh->prepare('UPDATE ' . $this->statistics_table_name . ' SET `value`=:value WHERE `key`=:key');
+		$sth->bindValue(':key', 'median', PDO::PARAM_STR);
+		$sth->bindValue(':value', $median, PDO::PARAM_INT);
+		$sth->execute();
+
 		return array(
 			'avg' => $avg,
 			'std' => $std,
-			'max' => $max
+			'max' => $max,
+			'median' => $median
 		);
 	}
 
@@ -117,7 +144,7 @@ class Users extends DataBase{
 		try{
 			$dbh = $this->connection();
 			//score
-			$sth = $dbh->prepare('SELECT name, score, score_log10 FROM ' . $this->user_table_name . ' WHERE score >= 0');
+			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name . ' WHERE score >= 0');
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
 			return $result;
@@ -135,7 +162,12 @@ class Users extends DataBase{
 			//$case[] = 'WHEN `' . $user['name'] . '` THEN `' . (($statics['avg'] - $user['score']) / $statics['std'] * 10 + 50 . '`');
 			//$case[] = 'WHEN `' . $user['name'] . '` THEN `100`';
 			//$karma = (($user['score_log10'] - $statics['avg']) / $statics['std']) * 10 + 50;
-			$karma = ($user['score_log10'] - sqrt($statics['avg']));
+			//var_dump($user);
+			$karma = ($user['score_log10'] - sqrt($statics['median']));
+			/*var_dump($user);
+			$karma = (
+				log($user['star_yellow'] / 10 + $user['star_green'] + $user['star_red'] + $user['star_blue'] + $user['star_purple'], 10) - sqrt($statics['median'])
+			);*/
 
 			try{
 				$dbh = $this->connection();
@@ -157,7 +189,7 @@ class Users extends DataBase{
 		foreach ($users as $userid) {
 			$query_where[]= '?';
 		}
-		$query = 'SELECT SUM(karma) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . '))';
+		$query = 'SELECT SUM(karma) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . ')) AND score > 1';
 		try{	
 			$dbh = $this->connection();
 			$sth = $dbh->prepare($query);
