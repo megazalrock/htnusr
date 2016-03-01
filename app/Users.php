@@ -135,7 +135,7 @@ class Users extends DataBase{
 			//$case[] = 'WHEN `' . $user['name'] . '` THEN `' . (($statics['avg'] - $user['score']) / $statics['std'] * 10 + 50 . '`');
 			//$case[] = 'WHEN `' . $user['name'] . '` THEN `100`';
 			//$karma = (($user['score_log10'] - $statics['avg']) / $statics['std']) * 10 + 50;
-			$karma = ($user['score_log10'] - sqrt($statics['max']));
+			$karma = ($user['score_log10'] - sqrt($statics['avg']));
 
 			try{
 				$dbh = $this->connection();

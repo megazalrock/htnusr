@@ -27,66 +27,43 @@ export default class Feed extends React.Component{
 
 	_getRss(mode){
 		if(this.cache.experiod < (Date.now() - 1000 * 60 * 1) || !this.cache[mode].length){
-			var url = this.props.rssUrls[mode];
-			var parseString = Xml2js.parseString;
 			$.ajax({
-				url: 'rssbypass.php',
+				url: 'get_feed.php',
 				data:{
-					url: encodeURIComponent(url)
+					type: mode 
 				},
-				dataType: 'text'
+				dataType: 'json'
 			})
-			.then((res) => {
-				//$('#debug').html(res);
-				parseString(res, (error, result) => {
-					var promises = [];
-					_.forEach(result['rdf:RDF'].item, (item) => {
-						var users = new Users();
-						var hatena = new Hatena();
-						var deferred = $.Deferred();
-						hatena.getUsers(item.link[0])
-							.then((data) => {
-								users.addUsers(data);
-								return users.getScore(data);
-							})
-							.then((score) => {
-								var _item = {
-									'title' : openArray(item.title),
-									'link' : openArray(item.link),
-									'description' : openArray(item.description),
-									'html' : openArray(item['content:encoded']),
-									'bookmarkCount' : openArray(item['hatena:bookmarkcount']),
-									'date' : openArray(item['dc:date']),
-									'category' : openArray(item['dc:subject']),
-									'score': score
-								};
-								deferred.resolve(_item);
-							});
-						promises.push(deferred.promise());
-					});
-					$.when(...promises)
-						.then((...items) => {
-							this.setState({
-								feed: items
-							});
-							this.cache.experiod = Date.now();
-							this.cache[mode] = items;
+			.then((res) =>{
+				var promises = [];
+				_.forEach(res, (item) => {
+					var users = new Users();
+					var hatena = new Hatena();
+					var deferred = $.Deferred();
+					hatena.getUsers(item.link)
+						.then((data) => {
+							users.addUsers(data);
+							return users.getScore(data);
+						})
+						.then((score) => {
+							item.score = score;
+							deferred.resolve(item);
 						});
+					promises.push(deferred.promise());
 				});
+				$.when(...promises)
+					.then((...items) => {
+						this.setState({
+							feed: items
+						});
+						this.cache.experiod = Date.now();
+						this.cache[mode] = items;
+					});
 			});
 		}else{
 			this.setState({
 				feed: this.cache[mode]
 			});
-		}
-		
-
-		function openArray(array) {
-			if(_.isArray(array) && array.length === 1){
-				return array[0];
-			}else{
-				return array;
-			}
 		}
 	}
 

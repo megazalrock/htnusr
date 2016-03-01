@@ -4,6 +4,8 @@ Class DataBase{
 	private $config;
 	public $user_table_name = 'users';
 	public $statistics_table_name = 'users_statistics';
+	public $feed_hot_table_name = 'feed_hot';
+	public $feed_new_table_name = 'feed_new';
 	function __construct(){
 		$this->config = parse_ini_file(dirname(__FILE__) . '/../../config.ini');
 		try{
@@ -23,6 +25,40 @@ Class DataBase{
 						PRIMARY KEY (`id`),
 						UNIQUE KEY `Unique` (`name`(32))
 					) ENGINE=InnoDB AUTO_INCREMENT=820 DEFAULT CHARSET=utf8;"
+				);
+				$sth->execute();
+			}
+			if(!in_array('feed_hot', $tables)){
+				$sth = $dbh->prepare(
+					"CREATE TABLE `feed_hot` (
+						`id` char(40) NOT NULL DEFAULT '',
+						`title` longtext,
+						`link` longtext,
+						`description` longtext,
+						`html` longtext,
+						`date` int(11) unsigned DEFAULT NULL,
+						`category` longtext,
+						`index` int(11) NOT NULL,
+						PRIMARY KEY (`id`),
+						UNIQUE KEY `UNIQUE` (`id`)
+					) ENGINE=InnoDB DEFAULT CHARSET=utf8;"
+				);
+				$sth->execute();
+			}
+			if(!in_array('feed_new', $tables)){
+				$sth = $dbh->prepare(
+					"CREATE TABLE `feed_new` (
+						`id` char(40) NOT NULL DEFAULT '',
+						`title` longtext,
+						`link` longtext,
+						`description` longtext,
+						`html` longtext,
+						`date` int(11) unsigned DEFAULT NULL,
+						`category` longtext,
+						`index` int(11) NOT NULL,
+						PRIMARY KEY (`id`),
+						UNIQUE KEY `UNIQUE` (`id`)
+					) ENGINE=InnoDB DEFAULT CHARSET=utf8;"
 				);
 				$sth->execute();
 			}

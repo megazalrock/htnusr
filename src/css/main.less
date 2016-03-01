@@ -91,7 +91,33 @@ html, body{
 			border: none;
 		}
 		.html{
+			overflow: hidden;
+			width: 100%;
 			blockquote{
+				& > *{
+					width: 100%;
+				}
+				p{
+					margin: 0;
+					padding: 0;
+				}
+				cite{
+					.title;
+					display: block;
+					font-style: normal;
+				}
+				cite + p{
+					display: inline-block;
+					float: left;
+					img{
+						vertical-align: top;
+						margin-right: @baseMargin;
+					}
+				}
+				cite + p + p{
+					.description;
+				}
+
 				p:last-child{
 					display: none;
 				}
@@ -107,8 +133,10 @@ html, body{
 					text-decoration: underline;
 				}
 			}
-
-
+		}
+		.description{
+			font-size: 0.9rem;
+			line-height: 1.5;
 		}
 		.footer{
 			font-size: 11px;
