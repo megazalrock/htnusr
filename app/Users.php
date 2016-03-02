@@ -209,6 +209,7 @@ class Users extends DataBase{
 			}catch(PDOException $e){
 				echo $e->getMessage();
 			}
+			echo $user['name'] . '<br>';
 		}
 
 	}
