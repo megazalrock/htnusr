@@ -1,5 +1,6 @@
 <?php
 date_default_timezone_set('Asia/Tokyo');
+require_once (dirname(__FILE__) . '/../app/lib/RequestChecker.php');
 require_once (dirname(__FILE__) . '/../app/Feed.php');
 $type = $_REQUEST['type'];
 if(empty($type)){
