@@ -108,47 +108,4 @@ Class DataBase{
 		}
 		return $dbh;
 	}
-	/*
-	public function add_user($userid){
-		try{
-			$dbh = $this->connection();
-			$sth = $dbh->prepare('INSERT IGNORE INTO ' . $this->htnusr_table_name . ' (name) VALUES (:userid)');
-			$sth->bindParam(':userid', $userid, PDO::PARAM_STR);
-			$result = $sth->execute();
-			return $result;
-		}catch(PDOException $e){
-			echo $e->getMessage();
-		}
-	}*/
-
-
-	/*public function save_source($source){
-		try{
-			$dbh = $this->connection();
-			$sth = $dbh->prepare('INSERT IGNORE INTO ' . $this->source_table_name . ' (success, done, url, yearmonth, unique_key) VALUES (:success, :done, :url, :yearmonth, :unique_key)');
-			$sth->bindValue(':success', 0, PDO::PARAM_INT);
-			$sth->bindValue(':done', 0, PDO::PARAM_INT);
-			$sth->bindParam(':url', $source['url'], PDO::PARAM_STR);
-			$sth->bindParam(':yearmonth', $source['yearmonth'], PDO::PARAM_INT);
-			$sth->bindParam(':unique_key', $source['unique_key'], PDO::PARAM_STR);
-			$result = $sth->execute();
-		}catch(PDOException $e){
-			echo $e->getMessage();
-		}
-	}
-
-	public function get_queue($is_success = 0, $is_done = 0){
-		$result = array();
-		try{
-			$dbh = $this->connection();
-			$sth = $dbh->prepare('SELECT * FROM ' . $this->source_table_name . ' WHERE success=:is_success AND done=:is_done ORDER BY yearmonth DESC');
-			$sth->bindParam(':is_success', $is_success, PDO::PARAM_INT);
-			$sth->bindParam(':is_done', $is_done, PDO::PARAM_INT);
-			$sth->execute();
-			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
-		}catch(PDOException $e){
-			echo $e->getMessage();
-		}
-		return $result;
-	}*/
 }
