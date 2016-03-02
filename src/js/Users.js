@@ -30,9 +30,8 @@ export default class Users {
 				users: data.users
 			}
 		})
-		.then((score, status, jqXhr) =>{
-			this.addUsersAjax = jqXhr;
-			deferred.resolve(score);
+		.then(() =>{
+			deferred.resolve();
 		})
 		.fail((...args) => {
 			deferred.reject(...args);
