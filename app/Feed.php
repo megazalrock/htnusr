@@ -191,6 +191,7 @@ Class Feed extends DataBase{
 		//var_dump($this->get_over_num('new'));
 		$this->delete_old_feed('hotentry');
 		$this->delete_old_feed('new');
+		echo 'Done !!';
 	}
 
 

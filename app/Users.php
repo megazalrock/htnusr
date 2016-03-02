@@ -37,7 +37,7 @@ class Users extends DataBase{
 			//$sth->bindParam(':score_log10', $score_log10, PDO::PARAM_STR);
 			$sth->bindParam(':last_updated', $last_updated, PDO::PARAM_INT);
 			$result = $sth->execute();
-			echo $userid . '<br>';
+			echo $userid . ' ';
 			return $result;
 		}catch(PDOException $e){
 			echo $e->getMessage();
@@ -65,6 +65,7 @@ class Users extends DataBase{
 			$this->update_user($userid);
 		}
 		$this->update_users_karma();
+		echo "\n Done !";
 		return $queue_list;
 	}
 
