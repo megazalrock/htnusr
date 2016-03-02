@@ -99,6 +99,16 @@ class Users extends DataBase{
 		$sth->bindValue(':value', $max, PDO::PARAM_INT);
 		$sth->execute();
 
+		//min
+		$sth = $dbh->prepare('SELECT MIN(score_log10) FROM ' . $this->user_table_name . ' WHERE score_log10 > 0');
+		$sth->execute();
+		$min = $sth->fetchAll(PDO::FETCH_COLUMN);
+		$min = $min[0];
+		$sth = $dbh->prepare('UPDATE ' . $this->statistics_table_name . ' SET `value`=:value WHERE `key`=:key');
+		$sth->bindValue(':key', 'min', PDO::PARAM_STR);
+		$sth->bindValue(':value', $min, PDO::PARAM_INT);
+		$sth->execute();
+
 		//median
 		$sth = $dbh->prepare(
 			'SELECT score_log10 FROM ' . $this->user_table_name . ' WHERE score_log10 > 0 ORDER BY score_log10'
@@ -124,6 +134,7 @@ class Users extends DataBase{
 			'avg' => $avg,
 			'std' => $std,
 			'max' => $max,
+			'min' => $min,
 			'median' => $median
 		);
 	}
@@ -164,7 +175,18 @@ class Users extends DataBase{
 			//$case[] = 'WHEN `' . $user['name'] . '` THEN `100`';
 			//$karma = (($user['score_log10'] - $statics['avg']) / $statics['std']) * 10 + 50;
 			//var_dump($user);
-			$karma = ($user['score_log10'] - sqrt($statics['median']));
+			//$karma = ($user['score_log10'] - sqrt($statics['median']));
+			//$karma = ($user['score_log10'] - sqrt($statics['median']));
+			/*$star_yellow_log10 = log($user['star_yellow'], 10);
+			if($star_yellow_log10 < 0){
+				$star_yellow_log10 = 0;
+			}
+			if($user['score_log10'] > 0){
+				$karma = $user['score_log10'];
+			}else{
+				$karma = $star_yellow_log10 + $user['score_log10']- $statics['median'] / 2;
+			}*/
+			$karma = $user['score_log10'] - ($statics['median'] / 2);
 			/*var_dump($user);
 			$karma = (
 				log($user['star_yellow'] / 10 + $user['star_green'] + $user['star_red'] + $user['star_blue'] + $user['star_purple'], 10) - sqrt($statics['median'])
@@ -185,8 +207,17 @@ class Users extends DataBase{
 	private function update_users_score(){
 		$users_list = $this->get_users_data();
 		foreach ($users_list as $user) {
-			$score = $user['star_green'] * 2 + $user['star_red'] * 4 + $user['star_blue'] * 25 + $user['star_purple'] * 256;
+			$color_star = $user['star_green'] * 2 + $user['star_red'] * 4 + $user['star_blue'] * 25 + $user['star_purple'] * 256;
+			$yellow_star_log = log($user['star_yellow'], 10);
+			if($yellow_star_log < 0){
+				$yellow_star_log = 0;
+			}
+			$score = $color_star / ($yellow_star_log + 1);
+
 			$score_log10 = log($score, 10);
+			if($score_log10 < 0){
+				$score_log10 = 0;
+			}
 			try{
 				$dbh = $this->connection();
 				$sth = $dbh->prepare('UPDATE ' . $this->user_table_name . ' SET score=:score, score_log10=:score_log10 WHERE name=:name');
@@ -201,7 +232,7 @@ class Users extends DataBase{
 
 	}
 
-	public function get_users_score($users){
+	public function get_users_score($users, $read_later_num){
 		if(!is_array($users) && is_string($users)){
 			$users = array($users);
 		}
@@ -209,7 +240,7 @@ class Users extends DataBase{
 		foreach ($users as $userid) {
 			$query_where[]= '?';
 		}
-		$query = 'SELECT SUM(karma) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . ')) AND score > 1';
+		$query = 'SELECT SUM(karma) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . ')) AND score > 0';
 		try{	
 			$dbh = $this->connection();
 			$sth = $dbh->prepare($query);
@@ -218,7 +249,7 @@ class Users extends DataBase{
 			}
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_COLUMN);
-			return $result[0];
+			return $result[0] - $read_later_num;
 		}catch(PDOException $e){
 			echo $e->getMessage();
 		}

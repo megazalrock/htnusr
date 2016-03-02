@@ -42,12 +42,21 @@ export default class Users {
 	
 	getScore(data){
 		var deferred = $.Deferred();
+		var readLaterNum = 0;
+		_.forEach(data.data.bookmarks, (bookmark) =>{
+			if(bookmark.tags.includes('あとで読む')){
+				readLaterNum += 1;
+			}
+		});
+
 		this.getScoreAjax = $.ajax({
 			url:'get_score.php',
 			dataType: 'text',
 			type: 'post',
 			data: {
-				users: data.users
+				users: data.users,
+				read_later_num: readLaterNum,
+				bookmark_count: data.bookmarkCount
 			}
 		})
 		.then((score) =>{

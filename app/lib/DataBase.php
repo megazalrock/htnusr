@@ -86,6 +86,9 @@ Class DataBase{
 				$sth->bindValue(':key', 'max', PDO::PARAM_STR);
 				$sth->execute();
 				$sth = $dbh->prepare('INSERT INTO ' . $this->statistics_table_name . ' (`key`) VALUES (:key)');
+				$sth->bindValue(':key', 'min', PDO::PARAM_STR);
+				$sth->execute();
+				$sth = $dbh->prepare('INSERT INTO ' . $this->statistics_table_name . ' (`key`) VALUES (:key)');
 				$sth->bindValue(':key', 'median', PDO::PARAM_STR);
 				$sth->execute();
 			}
