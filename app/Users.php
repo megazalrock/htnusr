@@ -152,11 +152,11 @@ class Users extends DataBase{
 		return $statics;
 	}
 
-	private function get_users_data(){
+	public function get_users_data(){
 		try{
 			$dbh = $this->connection();
 			//score
-			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name);
+			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name. ' ORDER BY karma DESC');
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
 			return $result;
@@ -171,26 +171,7 @@ class Users extends DataBase{
 		$users_list = $this->get_users_data();
 		$case = array();
 		foreach ($users_list as $user) {
-			//$case[] = 'WHEN `' . $user['name'] . '` THEN `' . (($statics['avg'] - $user['score']) / $statics['std'] * 10 + 50 . '`');
-			//$case[] = 'WHEN `' . $user['name'] . '` THEN `100`';
-			//$karma = (($user['score_log10'] - $statics['avg']) / $statics['std']) * 10 + 50;
-			//var_dump($user);
-			//$karma = ($user['score_log10'] - sqrt($statics['median']));
-			//$karma = ($user['score_log10'] - sqrt($statics['median']));
-			/*$star_yellow_log10 = log($user['star_yellow'], 10);
-			if($star_yellow_log10 < 0){
-				$star_yellow_log10 = 0;
-			}
-			if($user['score_log10'] > 0){
-				$karma = $user['score_log10'];
-			}else{
-				$karma = $star_yellow_log10 + $user['score_log10']- $statics['median'] / 2;
-			}*/
 			$karma = $user['score_log10'] - ($statics['median'] / 2);
-			/*var_dump($user);
-			$karma = (
-				log($user['star_yellow'] / 10 + $user['star_green'] + $user['star_red'] + $user['star_blue'] + $user['star_purple'], 10) - sqrt($statics['median'])
-			);*/
 
 			try{
 				$dbh = $this->connection();
@@ -212,9 +193,9 @@ class Users extends DataBase{
 			if($yellow_star_log < 0){
 				$yellow_star_log = 0;
 			}
-			$score = $color_star / ($yellow_star_log + 1);
+			$score = $color_star + $yellow_star_log;
 
-			$score_log10 = log($score, 10);
+			$score_log10 = log($score * 10, 10);
 			if($score_log10 < 0){
 				$score_log10 = 0;
 			}
