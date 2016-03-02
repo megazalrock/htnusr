@@ -165,7 +165,7 @@ Class Feed extends DataBase{
 
 
 	private function delete_old_feed($type){
-		$over_num = $this->get_over_num('new');
+		$over_num = $this->get_over_num($type);
 		if($over_num > 0){
 			if($type === 'hotentry'){
 				$table_name = $this->feed_hot_table_name;
