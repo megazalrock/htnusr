@@ -1,0 +1,14 @@
+#!/usr/local/bin/php
+<?php
+//local用 #!/usr/bin/php
+date_default_timezone_set('Asia/Tokyo');
+require_once (dirname(__FILE__) . '/app/Users.php');
+$users = new Users();
+if(!isset($argv[1])){
+	$limit = 1;
+}else{
+	$limit = $argv[1];
+}
+$queue_list = $users->update_users($limit);
+//echo count($queue_list) . 'users updated';
+?>
