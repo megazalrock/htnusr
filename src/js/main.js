@@ -1,3 +1,4 @@
+/* global ga */
 import React from 'react';
 import ReactDom from 'react-dom';
 import UaParser from 'ua-parser-js';

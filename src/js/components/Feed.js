@@ -1,3 +1,4 @@
+/* global ga */
 import $ from 'jquery';
 import React from 'react';
 import FeedItem from './FeedItem';
@@ -52,6 +53,7 @@ export default class Feed extends React.Component{
 				viewMode: mode
 			});
 			strage.setItem('viewMode', mode);
+			ga && ga('send', 'event', 'Header UI', 'Change View', mode);
 		}
 	}
 
@@ -62,6 +64,7 @@ export default class Feed extends React.Component{
 			});
 			this._getRss(mode);
 			strage.setItem('mode', mode);
+			ga && ga('send', 'event', 'Header UI', 'Change Feed', mode);
 		}
 	}
 
