@@ -68,19 +68,6 @@ export default class Users {
 		return deferred.promise();
 	}
 
-	getUserScore(userid){
-		var userPageUrl = 'http://b.hatena.ne.jp/' + userid + '/';
-		/*$.ajax({
-			url: 'http://s.hatena.ne.jp/blog.json',
-			dataType: 'jsonp',
-			data: {
-				uri : encodeURIComponent(userPageUrl)
-			}
-		})
-		.then((result) =>{
-			console.log(result.count);
-		});*/
-	}
 
 	getUsers(url){
 		var deferred = $.Deferred();
