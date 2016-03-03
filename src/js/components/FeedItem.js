@@ -9,7 +9,7 @@ export default class FeedItem extends React.Component{
 			bookmarkCount: null,
 			score: null
 		};
-		this.users = new Users(this.props.device);
+		this.users = new Users();
 	}
 
 	componentWillUnmount(){
@@ -72,7 +72,7 @@ export default class FeedItem extends React.Component{
 		return(
 			<div className={'feedItem view-' + this.props.viewMode}>
 				<div className="footer">
-					<div style={scoreStyle} className="score">{this.state.score}</div>
+					<div style={scoreStyle} className="score">{this.state.score || 'loading'}</div>
 					<a href={bookmarkUrl} target="_blank" className='bookmarkCount'><span className="count">{this.state.bookmarkCount}</span><span className="usersText">users</span></a>
 					<time className="date" dateTime={this.props.data.date}>{date.toLocaleString()}</time>
 					<div className="category">{this.props.data.category}</div>
