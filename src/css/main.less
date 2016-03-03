@@ -1,5 +1,6 @@
 @import 'reset';
 @baseMargin: 0.5rem;
+@hatenaColor: #008ede;
 html, body{
 	font-size: 15px;
 }
@@ -21,7 +22,7 @@ html, body{
 		}
 	}
 	.btn{
-		@btnSelectedBgColor: #008ede;
+		@btnSelectedBgColor: @hatenaColor;
 		@btnSelectedFontColor: #FFF;
 		@btnBgColor: #EEE;
 		@btnFontColor: #333;
@@ -79,6 +80,67 @@ html, body{
 	}
 }
 .feedList{
+	&.loading{
+		position: relative;
+		.loadingAnime{
+			@keyframes rotate{
+				from{
+					transform: rotate(0deg);
+				}
+				to{
+					transform: rotate(360deg);
+				}
+			}
+			@width: 70px;
+			@height: @width;
+			@color: @hatenaColor;//rgba(127,127,127, 0.5);
+			animation: rotate 1s linear;
+			animation-fill-mode: both;
+			animation-iteration-count: infinite;
+			top: 200px;
+			left: 0;
+			right: 0;
+			margin: 0 auto;
+			position: absolute;
+
+			display: block;
+			border-radius: @width / 2;
+			border: 1px solid lighten(@color, 15%);
+			width: @width;
+			height: @height;
+			//background: @color;
+
+			&:after,
+			&:before{
+				transform: rotate(45deg);
+				content:'';
+				position: absolute;
+				top:0;
+				left:0;
+				display: block;
+				border-radius: @width / 2;
+				border: 1px solid #000;
+				width: @width;
+				height: @height;
+				//background: @color;
+			}
+			&:before{
+				left: -10px;
+				border: 1px solid lighten(@color, 0%);
+			}
+			&:after{
+				left: 10px;
+				border: 1px solid lighten(@color, 30%);
+			}
+
+		}
+		.feedItem{
+			visibility: hidden;
+		}
+	}
+	.loadingAnime{
+		display: none;
+	}
 	.feedItem{
 		margin-top: @baseMargin * 2;
 		padding-bottom: @baseMargin * 2;

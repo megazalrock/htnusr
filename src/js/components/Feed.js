@@ -11,7 +11,8 @@ export default class Feed extends React.Component{
 		this.state = {
 			feed: [],
 			mode: strage.getItem('mode') || 'hotentry',
-			viewMode: strage.getItem('viewMode') ||'text'
+			viewMode: strage.getItem('viewMode') ||'text',
+			isLoading: false
 		};
 		this.cache = {
 			experiod: Date.now(),
@@ -25,6 +26,9 @@ export default class Feed extends React.Component{
 	}
 
 	_getRss(mode){
+		this.setState({
+			isLoading: true
+		});
 		if(this.cache.experiod < (Date.now() - 1000 * 60 * 1) || !this.cache[mode].length){
 			$.ajax({
 				url: 'get_feed.php',
@@ -39,10 +43,14 @@ export default class Feed extends React.Component{
 				});
 				this.cache.experiod = Date.now();
 				this.cache[mode] = res;
+				this.setState({
+					isLoading: false
+				});
 			});
 		}else{
 			this.setState({
-				feed: this.cache[mode]
+				feed: this.cache[mode],
+				isLoading: false
 			});
 		}
 	}
@@ -87,8 +95,9 @@ export default class Feed extends React.Component{
 						<div className={'html btn' + (this.state.viewMode === 'html' ? ' selected' : '')} onClick={this.setViewMode.bind(this, 'html')}>HTML表示</div>
 					</div>
 				</div>
-				<div className="feedList">
+				<div className={'feedList' + (this.state.isLoading ? ' loading' : '')}>
 					{feedList}
+					<div className="loadingAnime"></div>
 				</div>
 			</div>
 		);
