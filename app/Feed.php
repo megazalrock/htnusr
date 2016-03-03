@@ -21,6 +21,7 @@ Class Feed extends DataBase{
 		//オプション
 		curl_setopt($ch, CURLOPT_URL, $url); 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 		$feed =  curl_exec($ch);
 		$info = curl_getinfo($ch);
@@ -175,8 +176,8 @@ Class Feed extends DataBase{
 
 			try{
 				$dbh = $this->connection();
-				$sth = $dbh->prepare('DELETE FROM ' . $table_name . ' WHERE `index` < :index');
-				$sth->bindValue(':index', $over_num, PDO::PARAM_INT);
+				$sth = $dbh->prepare('DELETE FROM ' . $table_name . ' WHERE `index` >= :index');
+				$sth->bindValue(':index', self::FEED_MAX_NUM, PDO::PARAM_INT);
 				$sth->execute();
 			}catch(PDOException $e){
 				echo $e->getMessage();
@@ -188,7 +189,6 @@ Class Feed extends DataBase{
 	public function update_feed(){
 		$this->save_feed($this->parse_feed_data('hotentry'), 'hotentry');
 		$this->save_feed($this->parse_feed_data('new'), 'new');
-		//var_dump($this->get_over_num('new'));
 		$this->delete_old_feed('hotentry');
 		$this->delete_old_feed('new');
 		echo 'Done !!';
