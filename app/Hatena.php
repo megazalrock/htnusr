@@ -17,6 +17,21 @@ class HatenaAPI{
 		try{
 			$json = @file_get_contents(sprintf(self::STAR_API, rawurlencode(sprintf(self::HATEB_USER_PAGE, $userid))));
 			$json = json_decode($json, true);
+			if(!isset($json['count']['purple'])){
+				$json['count']['purple'] = 0;
+			}
+			if(!isset($json['count']['blue'])){
+				$json['count']['blue'] = 0;
+			}
+			if(!isset($json['count']['red'])){
+				$json['count']['red'] = 0;
+			}
+			if(!isset($json['count']['green'])){
+				$json['count']['green'] = 0;
+			}
+			if(!isset($json['count']['yellow'])){
+				$json['count']['yellow'] = 0;
+			}
 			return array(
 				//'score' => (float) self::calc_star($json['count']) + 1,
 				'purple' => (int) $json['count']['purple'],

@@ -10,5 +10,5 @@ $bookmark_count = $_REQUEST['bookmark_count'];
 if(!isset($user_list) || !isset($read_later_num) || !isset($bookmark_count)){
 	die;
 }
-$score = $users->get_users_score($user_list, $read_later_num, $bookmark_count);
+$score = $users->get_karma_sum($user_list, $read_later_num, $bookmark_count);
 echo $score;
