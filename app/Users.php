@@ -64,7 +64,10 @@ class Users extends DataBase{
 		foreach ($queue_list as $userid) {
 			$this->update_user($userid);
 		}
-		$this->update_users_karma();
+		if(!empty($queue_list)){
+			$this->update_users_karma();
+			echo "\n Karma Updated !";
+		}
 		echo "\n Done !";
 		return $queue_list;
 	}
