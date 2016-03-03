@@ -1,11 +1,10 @@
 import $ from 'jquery';
 import _ from 'lodash';
 export default class Users {
-	constructor(device){
+	constructor(){
 		this.addUsersAjax = null;
 		this.getScoreAjax = null;
 		this.getUsersAjax = null;
-		this.device = device;
 	}
 
 	abort(){
@@ -43,7 +42,7 @@ export default class Users {
 		var deferred = $.Deferred();
 		var readLaterNum = 0;
 		_.forEach(data.data.bookmarks, (bookmark) =>{
-			if(bookmark.tags.includes('あとで読む')){
+			if(bookmark.tags.indexOf('あとで読む') !== -1){
 				readLaterNum += 1;
 			}
 		});

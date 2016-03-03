@@ -1,7 +1,5 @@
-/* global ga */
 import React from 'react';
 import ReactDom from 'react-dom';
-import UaParser from 'ua-parser-js';
 import Feed from './components/Feed';
 
 class BetterHotentry{
@@ -13,9 +11,8 @@ class BetterHotentry{
 	}
 
 	init(){
-		var uaparser = new UaParser();
 		ReactDom.render(
-			<Feed rssUrls={this.rssUrls} uaparser={uaparser}/>,
+			<Feed rssUrls={this.rssUrls}/>,
 			document.getElementById('container')
 		);
 	}

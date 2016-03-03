@@ -79,7 +79,7 @@ export default class Feed extends React.Component{
 	render(){
 		var feedList = this.state.feed.map((item)=>{
 			return (
-				<FeedItem key={item.id} data={item} mode={this.state.mode} viewMode={this.state.viewMode} device={this.props.uaparser.getDevice()} />
+				<FeedItem key={item.id} data={item} mode={this.state.mode} viewMode={this.state.viewMode} />
 			);
 		});
 		return(

@@ -9,7 +9,7 @@ export default class FeedItem extends React.Component{
 			bookmarkCount: null,
 			score: null
 		};
-		this.users = new Users(this.props.device);
+		this.users = new Users();
 	}
 
 	componentWillUnmount(){
