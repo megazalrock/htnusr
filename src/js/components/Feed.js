@@ -2,6 +2,7 @@
 import $ from 'jquery';
 import React from 'react';
 import FeedItem from './FeedItem';
+import Users from '../Users';
 
 const strage = window.localStorage;
 
@@ -19,8 +20,9 @@ export default class Feed extends React.Component{
 			hotentry: [],
 			new: []
 		};
+		this.handleAddUserCount = 0;
+		this.users = [];
 	}
-
 	componentDidMount(){
 		this._getRss(this.state.mode);
 	}
@@ -55,6 +57,17 @@ export default class Feed extends React.Component{
 		}
 	}
 
+	handleAddUser(user_list){
+		this.users = this.users.concat(user_list).filter((value, index, self) =>{
+			return self.indexOf(value) === index;
+		});
+		this.handleAddUserCount += 1;
+		if(this.handleAddUserCount === this.state.feed.length - 1){
+			var users = new Users();
+			users.addUsers(this.users);
+		}
+	}
+
 	setViewMode(mode){
 		if(mode !== this.state.viewMode){
 			this.setState({
@@ -73,13 +86,14 @@ export default class Feed extends React.Component{
 			this._getRss(mode);
 			strage.setItem('mode', mode);
 			ga && ga('send', 'event', 'Header UI', 'Change Feed', mode);
+			this.handleAddUserCount = 0;
 		}
 	}
 
 	render(){
 		var feedList = this.state.feed.map((item)=>{
 			return (
-				<FeedItem key={item.id} data={item} mode={this.state.mode} viewMode={this.state.viewMode} />
+				<FeedItem key={item.id} data={item} mode={this.state.mode} viewMode={this.state.viewMode} onAddUser={this.handleAddUser.bind(this)} />
 			);
 		});
 		return(

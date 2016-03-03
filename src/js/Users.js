@@ -19,14 +19,14 @@ export default class Users {
 		}
 	}
 
-	addUsers(data){
+	addUsers(users){
 		var deferred = $.Deferred();
 		this.addUsersAjax = $.ajax({
 			url:'add_users.php',
 			dataType: 'text',
 			type: 'post',
 			data: {
-				users: data.users
+				users: users
 			}
 		})
 		.then(() =>{
