@@ -114,7 +114,7 @@ Class Feed extends DataBase{
 		}
 		try{
 			$dbh = $this->connection();
-			$sth = $dbh->prepare('SELECT * FROM ' . $table_name . ' ORDER BY `index`');
+			$sth = $dbh->prepare('SELECT * FROM ' . $table_name . ' ORDER BY `date` DESC');
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
 			return $result;
