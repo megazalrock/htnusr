@@ -17,10 +17,10 @@ export default class FeedItem extends React.Component{
 	}
 
 	componentDidMount(){
-		if(_.isNull(this.state.bookmarkCount) || _.isNull(this.state.score)){	
+		if(_.isNull(this.state.bookmarkCount) || _.isNull(this.state.score)){
 			this.users.getUsers(this.props.data.link)
 				.then((data) => {
-					this.users.addUsers(data);
+					this.props.onAddUser(data.users);
 					this.setState({bookmarkCount: data.bookmarkCount});
 					return this.users.getScore(data);
 				})
