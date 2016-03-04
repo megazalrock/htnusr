@@ -21,7 +21,6 @@ export default class FeedItem extends React.Component{
 			this.users.getUsers(this.props.data.link)
 				.then((data) => {
 					this.props.onAddUser(data.users);
-					this.users_list = data.users;
 					this.setState({bookmarkCount: data.bookmarkCount});
 					return this.users.getScore(data);
 				})

@@ -28,6 +28,7 @@ export default class Feed extends React.Component{
 	}
 
 	_getRss(mode){
+		this.handleAddUserCount = 0;
 		this.setState({
 			isLoading: true
 		});
@@ -63,8 +64,10 @@ export default class Feed extends React.Component{
 		});
 		this.handleAddUserCount += 1;
 		if(this.handleAddUserCount === this.state.feed.length - 1){
-			var users = new Users();
-			users.addUsers(this.users);
+			setTimeout(() => {
+				var users = new Users();
+				users.addUsers(this.users);
+			}, 100);
 		}
 	}
 
@@ -86,7 +89,6 @@ export default class Feed extends React.Component{
 			this._getRss(mode);
 			strage.setItem('mode', mode);
 			ga && ga('send', 'event', 'Header UI', 'Change Feed', mode);
-			this.handleAddUserCount = 0;
 		}
 	}
 
