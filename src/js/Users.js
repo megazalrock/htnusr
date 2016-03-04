@@ -38,7 +38,7 @@ export default class Users {
 		return deferred.promise();
 	}
 	
-	getScore(data, mode){
+	getScore(data, type){
 		var deferred = $.Deferred();
 		var tags = [];
 		_.forEach(data.data.bookmarks, (bookmark) =>{
@@ -54,7 +54,7 @@ export default class Users {
 				read_later_num: readLaterTags.length,
 				bookmark_count: data.bookmarkCount,
 				url: encodeURIComponent(data.data.url),
-				mode: mode
+				type: type
 			}
 		})
 		.then((score) =>{
