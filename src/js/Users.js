@@ -26,7 +26,7 @@ export default class Users {
 			dataType: 'text',
 			type: 'post',
 			data: {
-				users: users
+				users: users.join(',')
 			}
 		})
 		.then(() =>{
@@ -38,23 +38,23 @@ export default class Users {
 		return deferred.promise();
 	}
 	
-	getScore(data){
+	getScore(data, mode){
 		var deferred = $.Deferred();
-		var readLaterNum = 0;
+		var tags = [];
 		_.forEach(data.data.bookmarks, (bookmark) =>{
-			if(bookmark.tags.indexOf('あとで読む') !== -1){
-				readLaterNum += 1;
-			}
+			tags = tags.concat(bookmark.tags);
 		});
-
+		var readLaterTags = tags.join(',').match(/(?:あと|後)で(?:読|よ)む/g) || [];
 		this.getScoreAjax = $.ajax({
 			url:'get_score.php',
 			dataType: 'text',
 			type: 'post',
 			data: {
-				users: data.users,
-				read_later_num: readLaterNum,
-				bookmark_count: data.bookmarkCount
+				users: data.users.join(','),
+				read_later_num: readLaterTags.length,
+				bookmark_count: data.bookmarkCount,
+				url: encodeURIComponent(data.data.url),
+				mode: mode
 			}
 		})
 		.then((score) =>{

@@ -201,13 +201,22 @@ class Users extends DataBase{
 		}
 	}
 
+	/*private function get_karma_sum_from_url($url){
+		try{
+			$dbh = $this->connection();
+			$sth = $dbh->prepare('SELECT');
+		}catch(PDOException $e){
+			echo $e->getMessage();
+		}
+	}*/
+
 	/**
 	 * ユーザーリストから合計カルマを取得
 	 * @param  array $users          ユーザーIDのリスト
 	 * @param  int $read_later_num 「後で読む」の数
 	 * @return int
 	 */
-	public function get_karma_sum($users, $read_later_num){
+	public function get_karma_sum($users, $read_later_num, $url){
 		if(!is_array($users) && is_string($users)){
 			$users = array($users);
 		}
