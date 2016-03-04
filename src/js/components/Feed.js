@@ -1,5 +1,6 @@
 /* global ga */
 import $ from 'jquery';
+import _ from 'lodash';
 import React from 'react';
 import FeedItem from './FeedItem';
 import Users from '../Users';
@@ -20,15 +21,15 @@ export default class Feed extends React.Component{
 			hotentry: [],
 			new: []
 		};
-		this.handleAddUserCount = 0;
-		this.users = [];
+		this.handleGetHatebEndCount = 0;
+		this.hatebs = [];
 	}
 	componentDidMount(){
 		this._getRss(this.state.mode);
 	}
 
 	_getRss(mode){
-		this.handleAddUserCount = 0;
+		this.handleGetHatebEndCount = 0;
 		this.setState({
 			isLoading: true
 		});
@@ -58,19 +59,6 @@ export default class Feed extends React.Component{
 		}
 	}
 
-	handleAddUser(user_list){
-		this.users = this.users.concat(user_list).filter((value, index, self) =>{
-			return self.indexOf(value) === index;
-		});
-		this.handleAddUserCount += 1;
-		if(this.handleAddUserCount === this.state.feed.length - 1){
-			setTimeout(() => {
-				var users = new Users();
-				users.addUsers(this.users);
-			}, 100);
-		}
-	}
-
 	setViewMode(mode){
 		if(mode !== this.state.viewMode){
 			this.setState({
@@ -93,9 +81,9 @@ export default class Feed extends React.Component{
 	}
 
 	render(){
-		var feedList = this.state.feed.map((item)=>{
+		var feedList = this.state.feed.map((item, key)=>{
 			return (
-				<FeedItem key={item.id} data={item} mode={this.state.mode} viewMode={this.state.viewMode} onAddUser={this.handleAddUser.bind(this)} />
+				<FeedItem key={item.id + '-' + key} data={item} mode={this.state.mode} viewMode={this.state.viewMode} />
 			);
 		});
 		return(
