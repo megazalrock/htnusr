@@ -17,6 +17,7 @@ var LessPluginAutoprefix = require('less-plugin-autoprefix');
 var autoprefix = new LessPluginAutoprefix({browsers: ['last 2 versions']});
 
 var sourcemaps = require('gulp-sourcemaps');
+var gzip = require('gulp-gzip');
 
 var runSequence = require('run-sequence');
 
@@ -131,11 +132,22 @@ gulp.task('buildComplete', function () {
 	});
 });
 
+gulp.task('gzip', function(){
+	gulp.src(jsDestDir + jsMainFileName)
+		.pipe(gzip())
+		.pipe(gulp.dest(jsDestDir));
+
+	gulp.src(lessDestDir + cssMainFileName)
+		.pipe(gzip())
+		.pipe(gulp.dest(lessDestDir));
+});
+
 
 gulp.task('build', function (callback) {
 	return runSequence(
 		'clean',
 		['uglify', 'lessBuild'],
+		'gzip',
 		'buildComplete',
 		callback
 	);
