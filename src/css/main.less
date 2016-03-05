@@ -3,12 +3,39 @@
 @hatenaColor: #008ede;
 html, body{
 	font-size: 15px;
+	height: 100%;
 }
-
-.app{
-	padding: @baseMargin;
+html{
+	background: #E0E0E0;
+}
+a{
+	text-decoration: none;
+	&:hover{
+		text-decoration: underline;
+	}
+}
+h1{
+	font-size: 1rem;
+	margin: 0 0 @baseMargin 0;
+	text-align: center;
+	font-weight: bold;
+	a{
+		font-weight: normal;
+	}
+}
+h2{
+	font-size: 1.5rem;
+}
+h3{
+	font-size: 1rem;
+	font-weight: bold;
+}
+.wrapper{
+	padding: @baseMargin @baseMargin * 2;
 	max-width: 800px;
 	margin: 0 auto;
+	background: #FFF;
+	min-height: 100%;
 }
 
 .ui{
@@ -86,9 +113,8 @@ html, body{
 			@width: 70px;
 			@height: @width;
 			@color: @hatenaColor;//rgba(127,127,127, 0.5);
-			animation: rotate 1s linear;
+			animation: rotate 1s linear infinite;
 			animation-fill-mode: both;
-			animation-iteration-count: infinite;
 			top: 200px;
 			left: 0;
 			right: 0;
@@ -152,10 +178,6 @@ html, body{
 				line-height: @lineHeight;
 				a{
 					color: #00C;
-					text-decoration: none;
-					&:hover{
-						text-decoration: underline;
-					}
 					.favicon{
 						vertical-align: middle;
 						margin: -2px @baseMargin / 2 0 0;
@@ -253,5 +275,12 @@ html, body{
 				}
 			}
 		}
+	}
+}
+.globalFooter{
+	text-align: center;
+	margin-bottom: @baseMargin;
+	small{
+		opacity: 0.8;
 	}
 }
