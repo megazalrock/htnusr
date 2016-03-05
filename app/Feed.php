@@ -1,5 +1,6 @@
 <?php
 date_default_timezone_set('Asia/Tokyo');
+require_once (dirname(__FILE__) . '/Constant.php');
 require_once (dirname(__FILE__) . '/lib/DataBase.php');
 Class Feed extends DataBase{
 	const HOTENTRY_FEED_URL = 'http://feeds.feedburner.com/hatena/b/hotentry';
@@ -107,7 +108,7 @@ Class Feed extends DataBase{
 	}
 
 
-	public function get_feed_data($type){
+	public function get_feed_data($type, $encodeJson = true){
 		if($type === 'hotentry'){
 			$table_name = $this->feed_hot_table_name;
 		}else if($type === 'new'){
@@ -118,7 +119,11 @@ Class Feed extends DataBase{
 			$sth = $dbh->prepare('SELECT * FROM ' . $table_name . ' ORDER BY `date` DESC');
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
-			return $result;
+			if($encodeJson){
+				return json_encode($result);
+			}else{
+				return $result;
+			}
 		}catch(PDOException $e){
 			echo $e->getMessage();
 		}

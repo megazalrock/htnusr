@@ -39,7 +39,9 @@ export default class Feed extends React.Component{
 				data:{
 					type: mode 
 				},
-				dataType: 'json'
+				dataType: 'json',
+				cache: true,
+				ifModified: true
 			})
 			.then((res) =>{	
 				this.setState({

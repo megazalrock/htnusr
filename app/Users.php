@@ -1,14 +1,16 @@
 <?php
 date_default_timezone_set('Asia/Tokyo');
+require_once (dirname(__FILE__) . '/Constant.php');
 require_once (dirname(__FILE__) . '/lib/DataBase.php');
 require_once (dirname(__FILE__) . '/lib/Cache.php');
 require_once (dirname(__FILE__) . '/Hatena.php');
 class Users extends DataBase{
-	const EXPERIOD_UNIXTIME = 604800;//60 * 60 * 24 * 7;
+	const EXPIRES_UNIXTIME = 604800;//60 * 60 * 24 * 7;
 	public static $statics;
 	public function __construct(){
 		parent::__construct();
 		$this->statics = $this->get_statics();
+		$this->cache = new Cache(USER_SCORE_CAHCE_EXPIRES);
 	}
 
 	/**
@@ -34,7 +36,7 @@ class Users extends DataBase{
 	 * @return array
 	 */
 	public function get_star_update_queue_list($limit = 100){
-		$expires = time() - self::EXPERIOD_UNIXTIME;
+		$expires = time() - self::EXPIRES_UNIXTIME;
 		try{
 			$dbh = $this->connection();
 			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name . ' WHERE priority >= 1 OR last_updated <= :expires ORDER BY star_yellow DESC LIMIT 0, :limit');
@@ -203,7 +205,7 @@ class Users extends DataBase{
 	}
 
 	private function get_karma_sum_from_url($url, $type){
-		return Cache::get_cache($url);
+		return $this->cache->get_cache($url);
 	}
 
 	/**
