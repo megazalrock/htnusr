@@ -27,8 +27,11 @@ html, body{
 		@btnBgColor: #EEE;
 		@btnFontColor: #333;
 		@btnAnimeDuration: 200ms;
+		@btnSelectedShadow: inset 0px 0px 5px rgba(0, 0, 0, 0.5);
+		@btnShadow: inset 0px 0px 5px rgba(0, 0, 0, 0);
 
 		@btnShadowColor: rgba(0, 0, 0, 0.5);
+		@btnBorder: 1px solid rgba(0, 0, 0, 0.5);
 
 		@height: 36px;
 		font-size: 0.9rem;
@@ -40,42 +43,31 @@ html, body{
 		cursor: pointer;
 		background: @btnBgColor;
 		color: @btnFontColor;
-		box-shadow: 0px 0px 0px @btnShadowColor;
-		@keyframes btnHover{
+		box-sizing: border-box;
+		border: 1px solid rgba(0, 0, 0, 0);
+
+		@keyframes btnSelect{
 			from{
-				box-shadow: 0px 0px 0px @btnShadowColor;
-				//background-color: @btnBgColor;
+				box-shadow: @btnShadow;
+				background: @btnBgColor;
+				color: @btnFontColor;
 			}
 			to{
-				box-shadow: 0px 0px 5px @btnShadowColor;
-				//background-color: lighten(@btnBgColor, 1%);
+				box-shadow: @btnSelectedShadow;
+				background: @btnSelectedBgColor;
+				color: @btnSelectedFontColor;
 			}
-		}
-
-		&:hover{
-			z-index: 3;
-			animation: btnHover @btnAnimeDuration ease-out;
-			animation-fill-mode: forwards;
 		}
 		&.selected{
-			z-index: 2;
-			box-shadow: 0px 0px 5px @btnShadowColor;
-			@keyframes selectedBtnHover{
-				from{
-					//background-color: @btnSelectedBgColor;
-				}
-				to{
-					//background-color: lighten(@btnSelectedBgColor, 10%);
-				}
-			}
-			//animation: selectedBtnHover 0.2s ease-out reverse;
+			box-shadow: @btnSelectedShadow;
 			background: @btnSelectedBgColor;
 			color: @btnSelectedFontColor;
-			&:hover{
-				animation: selectedBtnHover @btnAnimeDuration ease-out;
-				animation-fill-mode: forwards;
-				//background-color: lighten(@btnSelectedBgColor, 10%);
-			}
+			animation: btnSelect @btnAnimeDuration linear;
+			animation-fill-mode: forwards;
+			border: @btnBorder;
+		}
+		&:hover{
+			border: @btnBorder;
 		}
 	}
 }
@@ -141,123 +133,124 @@ html, body{
 	.loadingAnime{
 		display: none;
 	}
-	.feedItem{
-		margin-top: @baseMargin * 2;
-		padding-bottom: @baseMargin * 2;
-		border-bottom: 1px solid #CCC;
-		word-wrap: break-word;
-		&:first-child{
-			margin-top: 0;
-		}
-		&:last-child{
-			border: none;
-		}
-		.html{
-			overflow: hidden;
-			width: 100%;
-			blockquote{
-				p{
-					margin: 0;
-					padding: 0;
-				}
-				cite{
-					.title;
-					display: block;
-					font-style: normal;
-				}
-				cite + p{
-					display: inline-block;
-					float: left;
-					img{
-						vertical-align: top;
-						margin-right: @baseMargin;
+	.feedListBox{
+		.feedItem{
+			margin-top: @baseMargin * 2;
+			padding-bottom: @baseMargin * 2;
+			border-bottom: 1px solid #CCC;
+			word-wrap: break-word;
+			&:last-child{
+				border: none;
+			}
+			
+			.title{
+				@fontSize: 1.1rem;
+				@lineHeight: 1.5;
+				display: block;
+				font-size: @fontSize;
+				margin:(@baseMargin * 2 - ((@fontSize * @lineHeight - @fontSize) / 2)) 0;
+				line-height: @lineHeight;
+				a{
+					color: #00C;
+					text-decoration: none;
+					&:hover{
+						text-decoration: underline;
+					}
+					.favicon{
+						vertical-align: middle;
+						margin: -2px @baseMargin / 2 0 0;
 					}
 				}
-				cite + p + p{
-					.description;
+			}
+			.text{
+				overflow: hidden;
+				.entryImage{
+					float: left;
+					margin-right: @baseMargin;
+					max-height: 120px;
+					min-width: 90px;
 				}
+				.description{
+					font-size: 0.9rem;
+					line-height: 1.5;
+				}
+			}
+			.footer{
+				font-size: 11px;
+				.score,
+				.category,
+				.date,
+				.bookmarkCount{
+					@height: 14px;
+					display: inline-block;
+					line-height: @height;
+					height: @height;
+					padding: 2px 4px;
+				}
+				.bookmarkCount{
+					color: #ff2d2d;
+					font-weight: bold;
+					background: #fdd;
+					.count{
+						font-size: 110%;
+					}
+					&:hover{
+						text-decoration: none;
+					}
+				}
+				.score{
+					color: #FFF;
+					vertical-align: top;
+					@s: 50%;
+					@l: 45%;
+					&.minus{
+						background: hsl(0, @s, @l);
+					}
+					&.plus{
+						background: hsl(100, @s, @l);
+					}
+					&.zero{
+						background: #CCC;
+					}
+				}
+				.category{
+					background: #EEE;
+				}
+			}
+		}
 
-				p:last-child{
-					display: none;
-				}
-			}	
-		}
-		.title{
-			font-size: 1.2rem;
-			margin:@baseMargin 0;
-			line-height: 1;
-			a{
-				text-decoration: none;
-				&:hover{
-					text-decoration: underline;
-				}
-			}
-		}
-		.description{
-			font-size: 0.9rem;
-			line-height: 1.5;
-		}
-		.footer{
-			font-size: 11px;
-			.score,
-			.category,
-			.date,
-			.bookmarkCount{
-				@height: 14px;
-				display: inline-block;
-				line-height: @height;
-				height: @height;
-				padding: 2px 4px;
-			}
-			.bookmarkCount{
-				color: #ff2d2d;
-				font-weight: bold;
-				background: #fdd;
-				.count{
-					font-size: 110%;
-				}
-				&:hover{
-					text-decoration: none;
-				}
-			}
-			.score{
-				color: #FFF;
-				vertical-align: top;
-				@s: 50%;
-				@l: 45%;
-				&.minus{
-					background: hsl(0, @s, @l);
-				}
-				&.plus{
-					background: hsl(100, @s, @l);
-				}
-				&.zero{
-					background: #CCC;
-				}
-			}
-			.category{
-				background: #EEE;
-			}
-		}
 		&.view-title{
-			margin-top: @baseMargin;
-			padding-bottom: @baseMargin;
-			.html, .text{
-				display: none
-			}
-			.title{
-				margin-bottom: 0;
-				font-size: 1rem;
+			.feedItem{
+				@fontSize: 1rem;
+				@lineHeight: 1.5;
+				margin-top: @baseMargin;
+				padding-bottom: (@baseMargin - ((@fontSize * @lineHeight - @fontSize) / 2));
+				.text{
+					display: none
+				}
+				.title{
+					margin: @baseMargin 0 0 0;
+					font-size: 1rem;
+				}
 			}
 		}
 		&.view-text{
-			.html{
-				display: none;
+			.feedItem{
+				.text{
+					display: block;
+					.entryImage{
+						display: none;
+					}
+				}
 			}
 		}
-		&.view-html{
-			.title, .text{
-				display: none
+		&.view-image{
+			.feedItem{
+				.text{
+					.entryImage{
+						display: inline-block;
+					}
+				}
 			}
 		}
 	}
