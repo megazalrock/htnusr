@@ -3,10 +3,12 @@ date_default_timezone_set('Asia/Tokyo');
 class Cache {
 	static public $cache_expires;
 	static private $cache_dir;
+	static private $is_gzip_enabled;
 
-	public function __construct($expires, $cache_dir = '/cache'){
+	public function __construct($expires, $is_gzip_enabled = false, $cache_dir = '/cache'){
 		$this->cache_expires = $expires;
 		$this->cache_dir = dirname(__FILE__) . '/../..' . $cache_dir;
+		$this->is_gzip_enabled = $is_gzip_enabled;
 	}
 
 	private function make_cache_dir(){
@@ -44,28 +46,51 @@ class Cache {
 	 */
 	public function respond($name, $content_type, $nocache_callback, $call_back_param_arr = array()){
 		$cache_file_path = $this->get_cache_file_path($name);
+		if($this->is_gzip_enabled){
+			$cache_file_path .= '.gz';
+		}
 		$file_time = $this->get_file_time($cache_file_path);
 		header("Content-Type: " . $content_type);
 		if($this->has_cache($name)){
-			$result = file_get_contents($cache_file_path);
+			//$result = file_get_contents($cache_file_path);
 			$is_cache = $file_time;
 			header('X-Mgzl-From-Cache: True');
 			header('Last-Modified: ' . date('r', $file_time));
+			if($this->is_gzip_enabled){
+				header("Content-Encoding: gzip");
+			}
+			header('Content-Length: ' . filesize($cache_file_path));
+			readfile($cache_file_path);
 		}else{
 			$is_cache = false;
 			$result = call_user_func_array($nocache_callback, $call_back_param_arr);
 			$this->save_cache($name, $result);
 			header('Last-Modified: ' . date('r'));
+			if($this->is_gzip_enabled){
+				ob_start('ob_gzhandler');
+			}
+			echo $result;
+			if($this->is_gzip_enabled){
+				ob_end_flush();
+			}
 		}
-		echo $result;
 		return $is_cache;
 	}
 
 	public function save_cache($name, $str){
 		$this->make_cache_dir();
 		$cache_file_path = $this->get_cache_file_path($name);
-		$handle = fopen($cache_file_path, 'w');
-		fwrite($handle, $str);
-		fclose($handle);
+		if($this->is_gzip_enabled){
+			$cache_file_path .= '.gz';
+			$gzip = gzopen( $cache_file_path , 'w9' ) ;
+			gzwrite( $gzip , $str ) ;
+			gzclose( $gzip ) ;
+		}else{
+			$handle = fopen($cache_file_path, 'w');
+			fwrite($handle, $str);
+			fclose($handle);
+		}
+
+		
 	}
 }

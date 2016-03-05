@@ -8,6 +8,6 @@ $type = $_REQUEST['type'];
 if(empty($type)){
 	die;
 }
-$cache = new Cache(FEED_CACHE_EXPIRES);
 $feed = new Feed();
+$cache = new Cache(FEED_CACHE_EXPIRES, true);
 $cache->respond($type, 'application/json; charset=utf-8', array($feed, 'get_feed_data'), array($type));
