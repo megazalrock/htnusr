@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import _ from 'lodash';
+const strage = window.localStorage;
 export default class Users {
 	constructor(){
 		this.addUsersAjax = null;
@@ -60,6 +61,10 @@ export default class Users {
 			}
 		})
 		.then((score) =>{
+			strage.setItem(data.data.url, JSON.stringify({
+				score: score,
+				last_updated: Math.floor(new Date() / 1000)
+			}));
 			deferred.resolve(score);
 		})
 		.fail((...args) => {
