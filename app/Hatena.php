@@ -1,5 +1,6 @@
 <?php
 date_default_timezone_set('Asia/Tokyo');
+require_once (dirname(__FILE__) . '/Constant.php');
 class HatenaAPI{
 	const STAR_API = 'http://s.hatena.ne.jp/blog.json?uri=%s';
 	const HATEB_USER_PAGE = 'http://b.hatena.ne.jp/%s/';
