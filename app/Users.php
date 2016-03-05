@@ -34,12 +34,12 @@ class Users extends DataBase{
 	 * @return array
 	 */
 	public function get_star_update_queue_list($limit = 100){
-		$experiod = time() - self::EXPERIOD_UNIXTIME;
+		$expires = time() - self::EXPERIOD_UNIXTIME;
 		try{
 			$dbh = $this->connection();
-			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name . ' WHERE priority >= 1 OR last_updated <= :experiod ORDER BY star_yellow DESC LIMIT 0, :limit');
+			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name . ' WHERE priority >= 1 OR last_updated <= :expires ORDER BY star_yellow DESC LIMIT 0, :limit');
 			$sth->bindParam(':limit', $limit, PDO::PARAM_INT);
-			$sth->bindParam(':experiod', $experiod, PDO::PARAM_INT);
+			$sth->bindParam(':expires', $expires, PDO::PARAM_INT);
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
 			return $result;

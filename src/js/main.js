@@ -11,7 +11,7 @@ class BetterHotentry{
 		};
 		var storageCache = new StorageCache();
 		storageCache.sweepCache((key, value) => {
-			return value.experiod < storageCache.getNow();
+			return value.expires < storageCache.getNow();
 		});
 	}
 

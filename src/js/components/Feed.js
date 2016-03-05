@@ -17,7 +17,7 @@ export default class Feed extends React.Component{
 			isLoading: false
 		};
 		this.cache = {
-			experiod: Date.now(),
+			expires: Date.now(),
 			hotentry: [],
 			new: []
 		};
@@ -33,7 +33,7 @@ export default class Feed extends React.Component{
 		this.setState({
 			isLoading: true
 		});
-		if(this.cache.experiod < (Date.now() - 1000 * 60 * 1) || !this.cache[mode].length){
+		if(this.cache.expires < (Date.now() - 1000 * 60 * 1) || !this.cache[mode].length){
 			$.ajax({
 				url: 'get_feed.php',
 				data:{
@@ -45,7 +45,7 @@ export default class Feed extends React.Component{
 				this.setState({
 					feed: res
 				});
-				this.cache.experiod = Date.now();
+				this.cache.expires = Date.now();
 				this.cache[mode] = res;
 				this.setState({
 					isLoading: false

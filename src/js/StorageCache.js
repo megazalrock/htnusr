@@ -1,9 +1,9 @@
 import _ from 'lodash';
 export default class StorageCache {
 
-	constructor(storage = window.localStorage, experiod = 60 * 60, keyPrefix = 'c-'){
+	constructor(storage = window.localStorage, expires = 60 * 60, keyPrefix = 'c-'){
 		this.storage = storage;
-		this.experiod = experiod;
+		this.expires = expires;
 		this.keyPrefix = keyPrefix;
 	}
 
