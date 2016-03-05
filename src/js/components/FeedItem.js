@@ -2,7 +2,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import React from 'react';
 import Users from '../Users';
-
+const strage = window.localStorage;
 export default class FeedItem extends React.Component{
 	constructor(props){
 		super(props);
@@ -18,18 +18,33 @@ export default class FeedItem extends React.Component{
 	}
 
 	componentDidMount(){
-		if(_.isNull(this.state.bookmarkCount) || _.isNull(this.state.score)){
-			this.users.getUsers(this.props.data.link)
-				.then((data) => {
-					this.setState({bookmarkCount: data.bookmarkCount});
-					return this.users.getScore(data, this.props.mode);
-				})
-				.then((score) => {
-					this.setState({score: this._roundNum(score).toFixed(2)});
-				})
-				.fail((...args) => {
-					console.log(args);
+		if(_.isNull(this.state.bookmarkCount) || _.isNull(this.state.score)){	
+			var cache = JSON.parse(strage.getItem(this.props.data.link));
+			var lifeTime = (this.props.mode === 'hotentry' ? 60 * 60 : 60 * 5);
+			if(!cache || (cache.lastUpdated < Math.floor(new Date() / 1000) - lifeTime)){
+				this.users.getUsers(this.props.data.link)
+					.then((data) => {
+						this.setState({bookmarkCount: data.bookmarkCount});
+						return this.users.getScore(data, this.props.mode);
+					})
+					.then((score) => {
+						this.setState({score: this._roundNum(score).toFixed(2)});
+						strage.setItem(this.props.data.link, JSON.stringify({
+							bookmarkCount: this.state.bookmarkCount,
+							score: score,
+							lastUpdated:  Math.floor(new Date() / 1000)
+						}));
+					})
+					.fail((...args) => {
+						console.log(args);
+					});
+			}else{
+				this.setState({
+					bookmarkCount: cache.bookmarkCount,
+					score: this._roundNum(cache.score)
 				});
+			}
+			
 		}
 	}
 

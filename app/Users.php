@@ -213,38 +213,26 @@ class Users extends DataBase{
 	 * @return int
 	 */
 	public function get_karma_sum($users, $read_later_num, $url, $type){
-		$result = Cache::get_cache($url);
-		if($result){
-			return array(
-				'is_cache' => true,
-				'score' => $result
-			);
-		}else{
-			if(!is_array($users) && is_string($users)){
-				$users = array($users);
+		if(!is_array($users) && is_string($users)){
+			$users = array($users);
+		}
+		$query_where = array();
+		foreach ($users as $userid) {
+			$query_where[]= '?';
+		}
+		$query = 'SELECT SUM(karma) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . ')) AND score > 0 AND karma IS NOT NULL';
+		try{	
+			$dbh = $this->connection();
+			$sth = $dbh->prepare($query);
+			foreach ($users as $key => $userid) {
+				$sth->bindValue($key + 1, $userid, PDO::PARAM_STR);
 			}
-			$query_where = array();
-			foreach ($users as $userid) {
-				$query_where[]= '?';
-			}
-			$query = 'SELECT SUM(karma) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . ')) AND score > 0 AND karma IS NOT NULL';
-			try{	
-				$dbh = $this->connection();
-				$sth = $dbh->prepare($query);
-				foreach ($users as $key => $userid) {
-					$sth->bindValue($key + 1, $userid, PDO::PARAM_STR);
-				}
-				$sth->execute();
-				$result = $sth->fetchAll(PDO::FETCH_COLUMN);
-				$result = $result[0] - $read_later_num;
-				Cache::save_cache($url, $result);
-				return array(
-					'is_cache' => false,
-					'score' => $result
-				);
-			}catch(PDOException $e){
-				echo $e->getMessage();
-			}
+			$sth->execute();
+			$result = $sth->fetchAll(PDO::FETCH_COLUMN);
+			$result = $result[0] - $read_later_num;
+			return $result;
+		}catch(PDOException $e){
+			echo $e->getMessage();
 		}
 
 		
