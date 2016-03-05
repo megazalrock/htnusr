@@ -96,12 +96,12 @@ export default class Feed extends React.Component{
 					<div className="viewMode btnBox">
 						<div className={'title btn' + (this.state.viewMode === 'title' ? ' selected' : '')} onClick={this.setViewMode.bind(this, 'title')}>タイトルのみ</div>
 						<div className={'text btn' + (this.state.viewMode === 'text' ? ' selected' : '')} onClick={this.setViewMode.bind(this, 'text')}>簡易表示</div>
-						<div className={'html btn' + (this.state.viewMode === 'html' ? ' selected' : '')} onClick={this.setViewMode.bind(this, 'html')}>HTML表示</div>
+						<div className={'image btn' + (this.state.viewMode === 'image' ? ' selected' : '')} onClick={this.setViewMode.bind(this, 'image')}>画像表示</div>
 					</div>
 				</div>
 				<div className={'feedList' + (this.state.isLoading ? ' loading' : '')}>
 					<div className="loadingAnime"></div>
-					<div className="feedListBox">
+					<div className={'feedListBox view-' + (this.state.viewMode)}>
 						{feedList}
 					</div>
 				</div>

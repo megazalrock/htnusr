@@ -142,36 +142,7 @@ html, body{
 			&:last-child{
 				border: none;
 			}
-			.html{
-				overflow: hidden;
-				width: 100%;
-				blockquote{
-					p{
-						margin: 0;
-						padding: 0;
-					}
-					cite{
-						.title;
-						display: block;
-						font-style: normal;
-					}
-					cite + p{
-						display: inline-block;
-						float: left;
-						img{
-							vertical-align: top;
-							margin-right: @baseMargin;
-						}
-					}
-					cite + p + p{
-						.description;
-					}
-
-					p:last-child{
-						display: none;
-					}
-				}	
-			}
+			
 			.title{
 				@fontSize: 1.1rem;
 				@lineHeight: 1.5;
@@ -180,15 +151,29 @@ html, body{
 				margin:(@baseMargin * 2 - ((@fontSize * @lineHeight - @fontSize) / 2)) 0;
 				line-height: @lineHeight;
 				a{
+					color: #00C;
 					text-decoration: none;
 					&:hover{
 						text-decoration: underline;
 					}
+					.favicon{
+						vertical-align: middle;
+						margin: -2px @baseMargin / 2 0 0;
+					}
 				}
 			}
-			.description{
-				font-size: 0.9rem;
-				line-height: 1.5;
+			.text{
+				overflow: hidden;
+				.entryImage{
+					float: left;
+					margin-right: @baseMargin;
+					max-height: 120px;
+					min-width: 90px;
+				}
+				.description{
+					font-size: 0.9rem;
+					line-height: 1.5;
+				}
 			}
 			.footer{
 				font-size: 11px;
@@ -232,12 +217,15 @@ html, body{
 					background: #EEE;
 				}
 			}
-			&.view-title{
+		}
+
+		&.view-title{
+			.feedItem{
 				@fontSize: 1rem;
 				@lineHeight: 1.5;
 				margin-top: @baseMargin;
 				padding-bottom: (@baseMargin - ((@fontSize * @lineHeight - @fontSize) / 2));
-				.html, .text{
+				.text{
 					display: none
 				}
 				.title{
@@ -245,14 +233,23 @@ html, body{
 					font-size: 1rem;
 				}
 			}
-			&.view-text{
-				.html{
-					display: none;
+		}
+		&.view-text{
+			.feedItem{
+				.text{
+					display: block;
+					.entryImage{
+						display: none;
+					}
 				}
 			}
-			&.view-html{
-				.title, .text{
-					display: none
+		}
+		&.view-image{
+			.feedItem{
+				.text{
+					.entryImage{
+						display: inline-block;
+					}
 				}
 			}
 		}
