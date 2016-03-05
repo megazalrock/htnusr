@@ -11,8 +11,3 @@ if(empty($type)){
 $cache = new Cache(FEED_CACHE_EXPIRES);
 $feed = new Feed();
 $cache->respond($type, 'application/json; charset=utf-8', array($feed, 'get_feed_data'), array($type));
-/*header("Content-Type: application/json; charset=utf-8");
-header("Last-Modified: " . gmdate('r', $last_modified));
-header("Cache-Control: max-age=" . ( 60 * 5));
-header("Paragma: cache");
-echo json_encode($result);*/
