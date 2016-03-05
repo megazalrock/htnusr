@@ -49,6 +49,8 @@ export default class Users {
 			url:'get_score.php',
 			dataType: 'text',
 			type: 'post',
+			ifModified: true,
+			cache: true,
 			data: {
 				users: data.users.join(','),
 				read_later_num: readLaterTags.length,
