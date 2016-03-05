@@ -214,7 +214,7 @@ class Users extends DataBase{
 	 * @param  int $read_later_num 「後で読む」の数
 	 * @return int
 	 */
-	public function get_karma_sum($users, $read_later_num, $url, $type){
+	public function get_karma_sum($users, $read_later_num, $bookmark_count, $type){
 		if(!is_array($users) && is_string($users)){
 			$users = array($users);
 		}
@@ -231,7 +231,7 @@ class Users extends DataBase{
 			}
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_COLUMN);
-			$result = $result[0] - $read_later_num;
+			$result = (($result[0] - $read_later_num) / $bookmark_count) * 100;
 			return $result;
 		}catch(PDOException $e){
 			echo $e->getMessage();

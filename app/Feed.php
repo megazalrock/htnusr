@@ -135,7 +135,7 @@ Class Feed extends DataBase{
 		}else if($type === 'new'){
 			$table_name = $this->feed_new_table_name;
 		}
-		$feed = $this->get_feed_data($type);
+		$feed = $this->get_feed_data($type, false);
 		foreach ($feed as $key => $feed_item) {
 			//$index = self::FEED_MAX_NUM - $key;
 			try{
