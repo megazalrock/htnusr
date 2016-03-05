@@ -8,7 +8,11 @@ class Cache {
 	public function __construct($expires, $is_gzip_enabled = false, $cache_dir = '/cache'){
 		$this->cache_expires = $expires;
 		$this->cache_dir = dirname(__FILE__) . '/../..' . $cache_dir;
-		$this->is_gzip_enabled = $is_gzip_enabled;
+		if(!(isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strstr($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip'))){
+			$this->is_gzip_enabled = false;
+		}else{
+			$this->is_gzip_enabled = $is_gzip_enabled;
+		}
 	}
 
 	private function make_cache_dir(){
