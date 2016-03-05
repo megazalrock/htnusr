@@ -100,8 +100,10 @@ export default class Feed extends React.Component{
 					</div>
 				</div>
 				<div className={'feedList' + (this.state.isLoading ? ' loading' : '')}>
-					{feedList}
 					<div className="loadingAnime"></div>
+					<div className="feedListBox">
+						{feedList}
+					</div>
 				</div>
 			</div>
 		);
