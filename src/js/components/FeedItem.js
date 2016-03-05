@@ -41,7 +41,7 @@ export default class FeedItem extends React.Component{
 			}else{
 				this.setState({
 					bookmarkCount: cache.bookmarkCount,
-					score: this._roundNum(cache.score)
+					score: this._roundNum(cache.score).toFixed(2)
 				});
 			}
 			
