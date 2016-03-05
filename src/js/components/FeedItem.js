@@ -76,7 +76,8 @@ export default class FeedItem extends React.Component{
 		})();
 
 		var entryImage = (() => {
-			var entryImageSrc = $(this.props.data.html).find('img.entry-image').attr('src');
+			var html = this.props.data.html.replace(/src="http:\/\/feeds.feedburner.com\/.*?"/, '');
+			var entryImageSrc = $(html).find('img.entry-image').attr('src');
 			if(entryImageSrc){
 				return (<img src={entryImageSrc} className="entryImage" alt=""/>);
 			}
