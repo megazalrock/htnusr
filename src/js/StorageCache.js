@@ -1,9 +1,7 @@
 import _ from 'lodash';
 export default class StorageCache {
-
-	constructor(storage = window.localStorage, expires = 60 * 60, keyPrefix = 'c-'){
+	constructor(storage = window.localStorage, keyPrefix = 'c-'){
 		this.storage = storage;
-		this.expires = expires;
 		this.keyPrefix = keyPrefix;
 	}
 
@@ -20,18 +18,21 @@ export default class StorageCache {
 		return this.storage.setItem(key, JSON.stringify(value));
 	}
 
-	loadItem(name){
-		var key = this._getKey(name);
-		return JSON.parse(this.storage.getItem(key));
+	loadItem(name, noprefix = false){
+		var key = noprefix ? name : this._getKey(name);
+		var value = this.storage.getItem(key);
+		if(_.isUndefined(value)){
+			return null;
+		}else{
+			return JSON.parse(value);
+		}
 
 	}
 
-	sweepCache(func = () => { return true; }){
-		_.forEach(Object.keys(this.storage), (key) => {
-			if(key.indexOf(this.keyPrefix) === 0){
-				if(func(key, this.loadItem(key))){
-					this.storage.removeItem(key);
-				}
+	sweepCache(conditionFnc = () => { return true; }){
+		_.keys(this.storage).map((key) => {
+			if(key.indexOf(this.keyPrefix) === 0 && conditionFnc.call(this, key, this.loadItem(key, true))){
+				this.storage.removeItem(key);
 			}
 		});
 	}

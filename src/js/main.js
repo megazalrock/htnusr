@@ -17,7 +17,7 @@ class BetterHotentry{
 
 	init(){
 		ReactDom.render(
-			<Feed rssUrls={this.rssUrls} cacheExperiod={this.cacheExperiod}/>,
+			<Feed rssUrls={this.rssUrls} cacheExpires={this.cacheExpires}/>,
 			document.getElementById('container')
 		);
 	}

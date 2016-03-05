@@ -20,10 +20,10 @@ export default class FeedItem extends React.Component{
 	componentDidMount(){
 		if(_.isNull(this.state.bookmarkCount) || _.isNull(this.state.score)){
 			var lifeTime = (this.props.mode === 'hotentry' ? 60 * 60 : 60 * 5);
-			var storageCache = new StorageCache(lifeTime);
-			var cache = storageCache.loadItem(this.props.data.link);
+			var storageCache = new StorageCache();
+			var cache = storageCache.loadItem(this.props.data.id);
 			var now = storageCache.getNow();
-			if(!cache || cache.lastUpdated < now - lifeTime){
+			if(!cache || cache.cacheExpires < now){
 				this.users.getUsers(this.props.data.link)
 					.then((data) => {
 						this.setState({bookmarkCount: data.bookmarkCount});
@@ -31,11 +31,11 @@ export default class FeedItem extends React.Component{
 					})
 					.then((score) => {
 						this.setState({score: this._roundNum(score).toFixed(2)});
-						storageCache.saveItem(this.props.data.link, JSON.stringify({
+						storageCache.saveItem(this.props.data.id, {
 							bookmarkCount: this.state.bookmarkCount,
 							score: score,
-							cacheExperiod:  storageCache.getNow() + lifeTime
-						}));
+							expires:  now + lifeTime
+						});
 					})
 					.fail((...args) => {
 						console.log(args);
