@@ -231,7 +231,7 @@ class Users extends DataBase{
 			}
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_COLUMN);
-			$result = (($result[0] - $read_later_num);
+			$result = ($result[0] - $read_later_num);
 			return $result;
 		}catch(PDOException $e){
 			echo $e->getMessage();
