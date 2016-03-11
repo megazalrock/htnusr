@@ -10,7 +10,7 @@ class Users extends DataBase{
 	public function __construct(){
 		parent::__construct();
 		$this->statics = $this->get_statics();
-		$this->cache = new Cache(USER_SCORE_CAHCE_EXPIRES);
+		$this->cache = new Cache(USER_SCORE_CAHCE_EXPIRES, false, USER_SCORE_CAHCE_DIR);
 	}
 
 	/**

@@ -3,11 +3,13 @@ date_default_timezone_set('Asia/Tokyo');
 class Cache {
 	static public $cache_expires;
 	static private $cache_dir;
+	static private $cache_base_dir;
 	static private $is_gzip_enabled;
 
-	public function __construct($expires, $is_gzip_enabled = false, $cache_dir = '/cache'){
+	public function __construct($expires, $is_gzip_enabled = false, $cache_dir = ''){
 		$this->cache_expires = $expires;
-		$this->cache_dir = dirname(__FILE__) . '/../..' . $cache_dir;
+		$this->cache_base_dir = dirname(__FILE__) . '/../../cache';
+		$this->cache_dir = $this->cache_base_dir . $cache_dir;
 		if(!(isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strstr($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip'))){
 			$this->is_gzip_enabled = false;
 		}else{
@@ -16,6 +18,9 @@ class Cache {
 	}
 
 	private function make_cache_dir(){
+		if(!file_exists($this->cache_base_dir)){
+			mkdir($this->cache_base_dir);
+		}
 		if(!file_exists($this->cache_dir)){
 			mkdir($this->cache_dir);
 		}
@@ -94,7 +99,22 @@ class Cache {
 			fwrite($handle, $str);
 			fclose($handle);
 		}
+	}
 
-		
+	public function sweap_old_cache($force = false){
+		if(!file_exists($this->cache_dir)){
+			return false;
+		}
+		$files = scandir($this->cache_dir);
+		foreach ($files as $file_name) {
+			$file_path = $this->cache_dir . '/' . $file_name;
+			if(!is_file($file_path)){
+				continue;
+			}
+			$file_time = filemtime($file_path);
+			if($force || $file_time < (time() - $this->cache_expires)){
+				unlink($file_path);
+			}
+		}
 	}
 }
