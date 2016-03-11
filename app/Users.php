@@ -284,7 +284,7 @@ class Users extends DataBase{
 		foreach ($users as $userid) {
 			$query_where[]= '?';
 		}
-		$query = 'SELECT SUM(karma) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . ')) AND score > 0 AND karma IS NOT NULL';
+		$query = 'SELECT SUM(karma) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . ')) AND karma IS NOT NULL';
 		try{	
 			$dbh = $this->connection();
 			$sth = $dbh->prepare($query);
