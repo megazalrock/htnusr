@@ -9,6 +9,15 @@ if(!isset($argv[1])){
 }else{
 	$limit = $argv[1];
 }
-$users->update_all($limit);
+$user_list = $users->get_star_update_queue_list($limit);
+$result = HatenaAPI::fetch_hateb_user_info($user_list);
+foreach ($user_list  as $user) {
+	if($result[$user['name']]['star'] !== false && $result[$user['name']]['followers'] !== false){
+		$users->update_user_star($user, $result[$user['name']]['star'], $result[$user['name']]['followers']);
+	}
+}
+$users->update_scores();
+$users->update_users_karma();
+//$users->update_all($limit);
 //echo count($queue_list) . 'users updated';
 ?>

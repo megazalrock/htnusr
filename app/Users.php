@@ -39,7 +39,7 @@ class Users extends DataBase{
 		$expires = time() - self::EXPIRES_UNIXTIME;
 		try{
 			$dbh = $this->connection();
-			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name . ' WHERE priority >= 1 OR last_updated <= :expires ORDER BY star_yellow DESC LIMIT 0, :limit');
+			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name . ' WHERE priority >= 1 OR last_updated <= :expires ORDER BY priority DESC, followers DESC LIMIT 0, :limit');
 			$sth->bindParam(':limit', $limit, PDO::PARAM_INT);
 			$sth->bindParam(':expires', $expires, PDO::PARAM_INT);
 			$sth->execute();
@@ -69,8 +69,7 @@ class Users extends DataBase{
 	 * @param  string $userid はてなユーザーID
 	 * @return boolean
 	 */
-	private function update_user_star($user){
-		$star_count = HatenaAPI::get_hateb_user_star($user['name']);
+	public function update_user_star($user, $star_count, $followers){
 		$user['priority'] = 0;
 		$user['score'] = $this->calc_user_score($star_count);
 		$user['score_log10'] = log($user['score'], 10);
@@ -81,9 +80,10 @@ class Users extends DataBase{
 		foreach ($star_count as $key => $value) {
 			$user['star_' . $key] = (int) $value;
 		}
+		$user['followers'] = $followers;
 		try{
 			$dbh = $this->connection();
-			$sth = $dbh->prepare('UPDATE ' . $this->user_table_name . ' SET score=:score, score_log10=:score_log10, last_updated=:last_updated, priority=:priority, star_yellow=:star_yellow, star_green=:star_green, star_red=:star_red, star_blue=:star_blue, star_purple=:star_purple WHERE name=:userid');
+			$sth = $dbh->prepare('UPDATE ' . $this->user_table_name . ' SET score=:score, score_log10=:score_log10, last_updated=:last_updated, priority=:priority, star_yellow=:star_yellow, star_green=:star_green, star_red=:star_red, star_blue=:star_blue, star_purple=:star_purple, followers=:followers WHERE name=:userid');
 			$sth->bindValue(':priority', 0, PDO::PARAM_INT);
 			$sth->bindParam(':userid', $user['name'], PDO::PARAM_STR);
 			$sth->bindParam(':score', $user['score'], PDO::PARAM_STR);
@@ -94,6 +94,7 @@ class Users extends DataBase{
 			$sth->bindParam(':star_blue', $user['star_blue'], PDO::PARAM_INT);
 			$sth->bindParam(':star_purple', $user['star_purple'], PDO::PARAM_INT);
 			$sth->bindParam(':last_updated', $user['last_updated'], PDO::PARAM_INT);
+			$sth->bindParam(':followers', $user['followers'], PDO::PARAM_INT);
 			$result = $sth->execute();
 			echo $user['name'] . ' ';
 			return $user;
@@ -110,8 +111,11 @@ class Users extends DataBase{
 	public function update_users_star($queue_list){
 		echo "\nstar update start\n";
 		$start = microtime(true);
+		$result = HatenaAPI::fetch_hateb_user_info($queue_list);
 		foreach ($queue_list as $key => $user) {
-			$queue_list[$key] = $this->update_user_star($user);
+			//$star_count = HatenaAPI::get_hateb_user_star($user['name']);
+			//$followers = HatenaAPI::get_hateb_user_follower($user['name']);
+			$queue_list[$key] = $this->update_user_star($user, $result[$user['name']]['star'], $result[$user['name']]['followers']);
 		}
 		echo "\nstar update end " . (microtime(true) - $start) . 'sec';
 		return $queue_list;
@@ -121,11 +125,12 @@ class Users extends DataBase{
 	 * 全ユーザーの情報をDBから取得
 	 * @return array
 	 */
-	public function get_users_data(){
+	public function get_users_data($limit = 10){
 		try{
 			$dbh = $this->connection();
 			//score
-			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name. ' ORDER BY karma DESC');
+			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name. ' WHERE priority > 1 ORDER BY priority DESC, score DESC LIMIT 0, :limit');
+			$sth->bindParam(':limit', $limit, PDO::PARAM_INT);
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
 			return $result;
@@ -314,6 +319,34 @@ class Users extends DataBase{
 			'min' => $min,
 			'median' => $median
 		);
+	}
+
+	public function update_scores(){
+		$dbh = $this->connection();
+		$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name . ' WHERE (score IS NOT NULL) AND (star_yellow IS NOT NULL) AND (followers IS NOT NULL)');
+		$sth->execute();
+		$users_list = $sth->fetchAll(PDO::FETCH_ASSOC);
+		//var_dump($users_list);
+		foreach ($users_list as &$user) {
+			//$dbh = $this->connection();
+			$sth = $dbh->prepare('UPDATE ' . $this->user_table_name . ' SET score=:score, score_log10=:score_log10 WHERE name=:name');
+			$score = $this->calc_user_score(array(
+				'yellow' => $user['star_yellow'],
+				'green' => $user['star_green'],
+				'red' => $user['star_red'],
+				'blue' => $user['star_blue'],
+				'purple' => $user['star_purple']
+			));
+			//var_dump($score);
+			//var_dump($user['followers']);
+			$score += $user['followers'];
+			$score_log10 = log($score, 10);
+			$sth->bindValue(':name', $user['name'], PDO::PARAM_STR);
+			$sth->bindValue(':score', $score, PDO::PARAM_STR);
+			$sth->bindValue(':score_log10', $score_log10, PDO::PARAM_STR);
+			$sth->execute();
+			echo $user['name'] . ' ';
+		}
 	}
 
 	/**

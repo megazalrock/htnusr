@@ -1,0 +1,21 @@
+#!/usr/local/bin/php
+<?php
+date_default_timezone_set('Asia/Tokyo');
+require_once (dirname(__FILE__) . '/app/Constant.php');
+require_once (dirname(__FILE__) . '/app/Hatena.php');
+require_once (dirname(__FILE__) . '/app/Users.php');
+
+if(!isset($argv[1])){
+	$limit = 100;
+}else{
+	$limit = $argv[1];
+}
+
+$users = new Users();
+
+$user_list = $users->get_users_data($limit);
+$result = HatenaAPI::fetch_hateb_user_info($user_list);
+foreach ($user_list  as $user) {
+	$users->update_user_star($user, $result[$user['name']]['star'], $result[$user['name']]['followers']);
+}
+?>
