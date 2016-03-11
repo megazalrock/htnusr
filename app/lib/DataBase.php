@@ -26,6 +26,7 @@ Class DataBase{
 						`star_red` int(11) DEFAULT NULL,
 						`star_blue` int(11) DEFAULT NULL,
 						`star_purple` int(11) DEFAULT NULL,
+						`followers` int(11) DEFAULT NULL,
 						PRIMARY KEY (`name`(32)),
 						UNIQUE KEY `UNIQUE` (`name`(32))
 					) ENGINE=InnoDB DEFAULT CHARSET=utf8;"
