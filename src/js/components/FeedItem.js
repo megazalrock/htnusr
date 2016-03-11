@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import _ from 'lodash';
 import React from 'react';
 import Users from '../Users';
@@ -12,7 +11,7 @@ export default class FeedItem extends React.Component{
 		};
 		this.users = new Users();
 	}
-
+	
 	componentWillUnmount(){
 		this.users.abort();
 	}
@@ -104,14 +103,9 @@ export default class FeedItem extends React.Component{
 		})();
 
 		var entryImage = (() => {
-			var html = this.props.data.html.replace(/src="http:\/\/feeds.feedburner.com\/.*?"/, '');
-			try{
-				var entryImageSrc = $(html).find('img.entry-image').attr('src');
-				if(entryImageSrc){
-					return (<img src={entryImageSrc} className="entryImage" alt=""/>);
-				}
-			}catch(e){
-				console.log(this.props.data.html);
+			var entryImageSrc = this.props.data.html.match(/"(http:\/\/cdn-ak\.b\.st-hatena\.com\/entryimage\/.*?)"/);
+			if(entryImageSrc){
+				return (<img src={entryImageSrc[1]} className="entryImage" alt=""/>);
 			}
 		})();
 
