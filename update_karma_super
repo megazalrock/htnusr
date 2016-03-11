@@ -6,14 +6,14 @@ require_once (dirname(__FILE__) . '/app/Hatena.php');
 require_once (dirname(__FILE__) . '/app/Users.php');
 
 if(!isset($argv[1])){
-	$limit = 100;
+	$limit = 10;
 }else{
 	$limit = $argv[1];
 }
 $users = new Users();
-for($i = 0; $i < 9; $i++){
+for($i = 0; $i < $limit; $i++){
 	echo "\nStart !\n";
-	$user_list = $users->get_star_update_queue_list($limit);
+	$user_list = $users->get_star_update_queue_list(100);
 	$result = HatenaAPI::fetch_hateb_users_info($user_list);
 	foreach ($user_list  as $user) {
 		$star_count = $result[$user['name']]['star'];
