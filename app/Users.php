@@ -42,7 +42,7 @@ class Users extends DataBase{
 		$expires = time() - self::EXPIRES_UNIXTIME;
 		try{
 			$dbh = $this->connection();
-			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name . ' WHERE priority >= 1 OR last_updated < :expires ORDER BY priority DESC, followers DESC LIMIT 0, :limit');
+			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name . ' WHERE priority >= 0 OR last_updated < :expires ORDER BY priority DESC, last_updated LIMIT 0, :limit');
 			$sth->bindParam(':limit', $limit, PDO::PARAM_INT);
 			$sth->bindParam(':expires', $expires, PDO::PARAM_INT);
 			$sth->execute();
@@ -103,22 +103,33 @@ class Users extends DataBase{
 			$user['score_log10'] = 0;
 		}
 		$user['last_updated'] = time();
-		$user['followers'] = $followers;
+		//$user['followers'] = $followers;
 		$user['score'] = $this->calc_user_score($star_count, $followers);
 		$user['score_log10'] = log($user['score'], 10);
-		if($star_count === false){
+		if(
+			(
+				(!isset($user['star_yellow']) || is_null($user['star_yellow'])) ||
+					(!isset($user['star_green']) || is_null($user['star_green'])) ||
+					(!isset($user['star_red']) || is_null($user['star_red'])) ||
+					(!isset($user['star_blue']) || is_null($user['star_blue'])) ||
+					(!isset($user['star_purple']) || is_null($star_purple['star_yellow']))
+				) && $star_count === false
+		){
 			$user['star_yellow'] = null;
 			$user['star_green'] = null;
 			$user['star_red'] = null;
 			$user['star_blue'] = null;
 			$user['star_purple'] = null;
-		}else{
+		}else if($star_count !== false){
 			foreach ($star_count as $key => $value) {
 				$user[$key] = $value;
 			}
 		}
-		if($followers === false){
-			$followers = null;
+
+		if( (!isset($user['followers']) || is_null($user['followers'])) && $followers === false){
+			$user['followers'] = null;
+		}else if($followers !== false){
+			$user['followers'] = $followers;
 		}
 		$query = 'UPDATE ' . $this->user_table_name . ' SET score=:score, score_log10=:score_log10, priority=:priority, star_yellow=:star_yellow, star_green=:star_green, star_red=:star_red, star_blue=:star_blue, star_purple=:star_purple, followers=:followers';
 		if(!$no_last_update){
