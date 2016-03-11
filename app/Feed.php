@@ -2,6 +2,7 @@
 date_default_timezone_set('Asia/Tokyo');
 require_once (dirname(__FILE__) . '/Constant.php');
 require_once (dirname(__FILE__) . '/lib/DataBase.php');
+require_once (dirname(__FILE__) . '/lib/Cache.php');
 Class Feed extends DataBase{
 	const HOTENTRY_FEED_URL = 'http://feeds.feedburner.com/hatena/b/hotentry';
 	const NEW_FEED_URL = 'http://b.hatena.ne.jp/entrylist?mode=rss';
@@ -198,6 +199,4 @@ Class Feed extends DataBase{
 		$this->delete_old_feed('new');
 		echo 'Done !!';
 	}
-
-
 }

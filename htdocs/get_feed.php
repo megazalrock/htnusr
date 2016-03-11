@@ -9,5 +9,5 @@ if(empty($type)){
 	die;
 }
 $feed = new Feed();
-$cache = new Cache(FEED_CACHE_EXPIRES, true);
+$cache = new Cache(FEED_CACHE_EXPIRES, true, FEED_CACHE_DIR);
 $cache->respond($type, 'application/json; charset=utf-8', array($feed, 'get_feed_data'), array($type));

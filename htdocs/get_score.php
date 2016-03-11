@@ -22,5 +22,5 @@ $type = $_REQUEST['type'];
 foreach ($user_list as $userid) {
 	$users->add_user($userid);
 }
-$cache = new Cache(USER_SCORE_CAHCE_EXPIRES);
+$cache = new Cache(USER_SCORE_CAHCE_EXPIRES, false, USER_SCORE_CAHCE_DIR);
 $cache->respond($url, 'text/plain', array($users, 'get_karma_sum'), array($user_list, $read_later_num, $bookmark_count, $type));

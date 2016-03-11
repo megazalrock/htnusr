@@ -5,4 +5,6 @@ date_default_timezone_set('Asia/Tokyo');
 require_once (dirname(__FILE__) . '/app/Feed.php');
 $feed = new Feed();
 $feed->update_feed();
+$cache = new Cache(FEED_CACHE_EXPIRES, true, FEED_CACHE_DIR);
+$cache->sweap_old_cache();
 ?>
