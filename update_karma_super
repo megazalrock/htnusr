@@ -1,0 +1,27 @@
+#!/usr/local/bin/php
+<?php
+date_default_timezone_set('Asia/Tokyo');
+require_once (dirname(__FILE__) . '/app/Constant.php');
+require_once (dirname(__FILE__) . '/app/Hatena.php');
+require_once (dirname(__FILE__) . '/app/Users.php');
+
+if(!isset($argv[1])){
+	$limit = 100;
+}else{
+	$limit = $argv[1];
+}
+$users = new Users();
+for($i = 0; $i < 9; $i++){
+	echo "\nStart !\n";
+	$user_list = $users->get_star_update_queue_list($limit);
+	$result = HatenaAPI::fetch_hateb_users_info($user_list);
+	foreach ($user_list  as $user) {
+		$star_count = $result[$user['name']]['star'];
+		$followers = $result[$user['name']]['followers'];
+		$users_list[$key] = $users->update_user_star($user, $star_count, $followers);
+	}
+	echo "\nsleeping...";
+	sleep(2);
+}
+$users->update_users_karma($users->get_karma_update_queue_list());
+?>

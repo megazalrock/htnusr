@@ -18,6 +18,9 @@ class Users extends DataBase{
 	 * @param string $userid はてなユーザーID
 	 */
 	public function add_user($userid){
+		if(empty($userid)){
+			return false;
+		}
 		try{
 			$dbh = $this->connection();
 			$sth = $dbh->prepare('INSERT IGNORE INTO ' . $this->user_table_name . ' (name, priority) VALUES (:userid, :priority)');
@@ -39,9 +42,26 @@ class Users extends DataBase{
 		$expires = time() - self::EXPIRES_UNIXTIME;
 		try{
 			$dbh = $this->connection();
-			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name . ' WHERE priority >= 1 OR last_updated <= :expires ORDER BY star_yellow DESC LIMIT 0, :limit');
+			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name . ' WHERE priority >= 1 OR last_updated < :expires ORDER BY priority DESC, followers DESC LIMIT 0, :limit');
 			$sth->bindParam(':limit', $limit, PDO::PARAM_INT);
 			$sth->bindParam(':expires', $expires, PDO::PARAM_INT);
+			$sth->execute();
+			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
+			return $result;
+		}catch(PDOException $e){
+			echo $e->getMessage();
+		}
+	}
+
+	/**
+	 * スコアを更新する対象を取得
+	 * @return array
+	 */
+	public function get_score_update_queue_list(){
+		$expires = time() - self::EXPIRES_UNIXTIME;
+		try{
+			$dbh = $this->connection();
+			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name . ' WHERE ((star_yellow IS NOT NULL) AND (star_green IS NOT NULL) AND (star_red IS NOT NULL) AND (star_blue IS NOT NULL) AND (star_purple IS NOT NULL)) OR followers IS NOT NULL');
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
 			return $result;
@@ -55,13 +75,21 @@ class Users extends DataBase{
 	 * @param  array $star スター
 	 * @return integer
 	 */
-	private function calc_user_score($star){
-		$color_star = $star['green'] * 2 + $star['red'] * 4 + $star['blue'] * 25 + $star['purple'] * 256;
-		$yellow_star_log = log($star['yellow'], 10);
-		if($yellow_star_log < 0){
-			$yellow_star_log = 0;
+	private function calc_user_score($star_count, $followers){
+		//黄 + 緑 * 2 + 赤 * 4 + 青 * 25 + 紫 * 256
+		if(is_array($star_count)){
+			$star = $star_count['star_yellow'] + $star_count['star_green'] * 2 + $star_count['star_red'] * 4 + $star_count['star_blue'] * 25 + $star_count['star_purple'] * 256;
+		}else{
+			$star = 0;
 		}
-		return $color_star + $yellow_star_log;
+		$star_log = log($star, 10);
+		if($star_log < 0){
+			$star_log = 0;
+		}
+		if($followers === false){
+			$followers = 0;
+		}
+		return $star_log + $followers;
 	}
 
 	/**
@@ -69,21 +97,37 @@ class Users extends DataBase{
 	 * @param  string $userid はてなユーザーID
 	 * @return boolean
 	 */
-	private function update_user_star($user){
-		$star_count = HatenaAPI::get_hateb_user_star($user['name']);
+	public function update_user_star($user, $star_count, $followers, $no_last_update = false){
 		$user['priority'] = 0;
-		$user['score'] = $this->calc_user_score($star_count);
-		$user['score_log10'] = log($user['score'], 10);
 		if($user['score_log10'] < 0){
 			$user['score_log10'] = 0;
 		}
 		$user['last_updated'] = time();
-		foreach ($star_count as $key => $value) {
-			$user['star_' . $key] = (int) $value;
+		$user['followers'] = $followers;
+		$user['score'] = $this->calc_user_score($star_count, $followers);
+		$user['score_log10'] = log($user['score'], 10);
+		if($star_count === false){
+			$user['star_yellow'] = null;
+			$user['star_green'] = null;
+			$user['star_red'] = null;
+			$user['star_blue'] = null;
+			$user['star_purple'] = null;
+		}else{
+			foreach ($star_count as $key => $value) {
+				$user[$key] = $value;
+			}
 		}
+		if($followers === false){
+			$followers = null;
+		}
+		$query = 'UPDATE ' . $this->user_table_name . ' SET score=:score, score_log10=:score_log10, priority=:priority, star_yellow=:star_yellow, star_green=:star_green, star_red=:star_red, star_blue=:star_blue, star_purple=:star_purple, followers=:followers';
+		if(!$no_last_update){
+			$query .= ', last_updated=:last_updated';
+		}
+		$query .= ' WHERE name=:userid';
 		try{
 			$dbh = $this->connection();
-			$sth = $dbh->prepare('UPDATE ' . $this->user_table_name . ' SET score=:score, score_log10=:score_log10, last_updated=:last_updated, priority=:priority, star_yellow=:star_yellow, star_green=:star_green, star_red=:star_red, star_blue=:star_blue, star_purple=:star_purple WHERE name=:userid');
+			$sth = $dbh->prepare($query);
 			$sth->bindValue(':priority', 0, PDO::PARAM_INT);
 			$sth->bindParam(':userid', $user['name'], PDO::PARAM_STR);
 			$sth->bindParam(':score', $user['score'], PDO::PARAM_STR);
@@ -93,7 +137,10 @@ class Users extends DataBase{
 			$sth->bindParam(':star_red', $user['star_red'], PDO::PARAM_INT);
 			$sth->bindParam(':star_blue', $user['star_blue'], PDO::PARAM_INT);
 			$sth->bindParam(':star_purple', $user['star_purple'], PDO::PARAM_INT);
-			$sth->bindParam(':last_updated', $user['last_updated'], PDO::PARAM_INT);
+			if(!$no_last_update){
+				$sth->bindParam(':last_updated', $user['last_updated'], PDO::PARAM_INT);
+			}
+			$sth->bindParam(':followers', $user['followers'], PDO::PARAM_INT);
 			$result = $sth->execute();
 			echo $user['name'] . ' ';
 			return $user;
@@ -110,8 +157,15 @@ class Users extends DataBase{
 	public function update_users_star($queue_list){
 		echo "\nstar update start\n";
 		$start = microtime(true);
+		$result = HatenaAPI::fetch_hateb_users_info($queue_list);
 		foreach ($queue_list as $key => $user) {
-			$queue_list[$key] = $this->update_user_star($user);
+			$star_count = $result[$user['name']]['star'];
+			$followers = $result[$user['name']]['followers'];
+			if($star_count !== false && $followers !== false){
+				$queue_list[$key] = $this->update_user_star($user, $star_count, $followers);
+			}else{
+				echo "\e[31m" . $user['name'] . "m";
+			}
 		}
 		echo "\nstar update end " . (microtime(true) - $start) . 'sec';
 		return $queue_list;
@@ -121,11 +175,18 @@ class Users extends DataBase{
 	 * 全ユーザーの情報をDBから取得
 	 * @return array
 	 */
-	public function get_users_data(){
+	public function get_users_data($ordeyby = 'score',$limit = false){
+		$query = 'SELECT * FROM ' . $this->user_table_name;
+		if(is_numeric($limit)){
+			$query .=  ' LIMIT 0, :limit';
+		}
 		try{
 			$dbh = $this->connection();
 			//score
-			$sth = $dbh->prepare('SELECT * FROM ' . $this->user_table_name. ' ORDER BY karma DESC');
+			$sth = $dbh->prepare($query);
+			if(is_numeric($limit)){
+				$sth->bindParam(':limit', $limit, PDO::PARAM_INT);
+			}
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
 			return $result;
@@ -140,16 +201,21 @@ class Users extends DataBase{
 	 * @param  boolean $all 対象を全ユーザーにするかのフラグ
 	 * @return boolean
 	 */
-	private function get_karma_update_queue_list($limit = 100, $all = false){
+	public function get_karma_update_queue_list($limit = false){
 		try{
 			$dbh = $this->connection();
 			$query = 'SELECT * FROM ' . $this->user_table_name;
-			if(!$all){
-				$query .= ' WHERE (karma IS NULL AND score IS NOT NULL AND last_updated IS NOT NULL)';
+			if($limit === false){
+				$query .= ' WHERE (karma IS NULL AND score IS NOT NULL)';
 			}
-			$query .= ' ORDER BY star_yellow DESC LIMIT 0, :limit';
+			$query .= ' ORDER BY score DESC';
+			if(is_numeric($limit)){
+				$query .= ' LIMIT 0, :limit';
+			}
 			$sth = $dbh->prepare($query);
-			$sth->bindParam(':limit', $limit, PDO::PARAM_INT);
+			if(is_numeric($limit)){
+				$sth->bindParam(':limit', $limit, PDO::PARAM_INT);
+			}
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
 			return $result;
@@ -197,15 +263,11 @@ class Users extends DataBase{
 			$sth->bindParam(':karma', $user['karma'], PDO::PARAM_INT);
 			$sth->bindParam(':name', $user['name'], PDO::PARAM_INT);
 			$sth->execute();
-			echo $user['name'] . ' ';
+			//echo $user['name'] . ' ';
 			return $user;
 		}catch(PDOException $e){
 			echo $e->getMessage();
 		}
-	}
-
-	private function get_karma_sum_from_url($url, $type){
-		return $this->cache->get_cache($url);
 	}
 
 	/**
@@ -222,7 +284,7 @@ class Users extends DataBase{
 		foreach ($users as $userid) {
 			$query_where[]= '?';
 		}
-		$query = 'SELECT SUM(karma) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . ')) AND score > 0 AND karma IS NOT NULL';
+		$query = 'SELECT SUM(karma) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . ')) AND karma IS NOT NULL';
 		try{	
 			$dbh = $this->connection();
 			$sth = $dbh->prepare($query);
@@ -231,13 +293,11 @@ class Users extends DataBase{
 			}
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_COLUMN);
-			$result = (($result[0] - $read_later_num);
+			$result = ($result[0] - $read_later_num);
 			return $result;
 		}catch(PDOException $e){
 			echo $e->getMessage();
 		}
-
-		
 	}
 
 	/**
@@ -316,6 +376,19 @@ class Users extends DataBase{
 		);
 	}
 
+	public function update_scores($users_list){
+		foreach ($users_list as $user) {
+			$star_count = array();
+			foreach ($user as $key => $value) {
+				if(strstr($key, 'star_')){
+					$star_count[$key] = $value;
+				}
+			}
+			$followers = $user['followers'];
+			$this->update_user_star($user, $star_count, $followers, true);
+		}
+	}
+
 	/**
 	 * 統計値をDBから取得
 	 * @return array
@@ -332,29 +405,4 @@ class Users extends DataBase{
 		}
 		return $statics;
 	}
-
-	/**
-	 * まとめて更新
-	 * @param  int $limit 一度に更新するユーザーの数
-	 * @return boolean
-	 */
-	public function update_all($limit = 20){
-		echo 'update all start';
-		$queue_list = $this->get_star_update_queue_list($limit);
-		if(!empty($queue_list)){
-			$queue_list = $this->update_users_star($queue_list);
-			$queue_list = $this->update_users_karma($queue_list);
-		}
-	}
-
-	public function update_star($limit = 20){
-		$queue_list = $this->get_star_update_queue_list($limit);
-		$queue_list = $this->update_users_star($queue_list);
-	}
-
-	public function update_karma($limit = 20, $all = false){
-		$queue_list = $this->get_karma_update_queue_list($limit, $all);
-		$queue_list = $this->update_users_karma($queue_list);
-	}
-
 }

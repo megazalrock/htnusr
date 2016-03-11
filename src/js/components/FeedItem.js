@@ -62,21 +62,34 @@ export default class FeedItem extends React.Component{
 		if(100 < scoreSaturation){
 			scoreSaturation = 100;
 		}
-		var easing = (t, b, c, d) =>{
+		/*var expoOut = (t, b, c, d) => {
 			return c * ( -Math.pow( 2, -10 * t/d ) + 1 ) + b;
+		};
+		var expoIn = (t, b, c, d) => {
+			return c * Math.pow( 2, 10 * (t/d - 1) ) + b;
+		};*/
+		var linear = (t, b, c, d) => {
+			return c*t/d + b;
+		};
+
+		var cubeIn = (t, b, c, d) => {
+			t /= d;
+			return c*t*t*t + b;
 		};
 
 		if(this.state.score < 0){ //minus
-			s = easing(scoreSaturation, 0, 1, 100);
+			s = cubeIn(scoreSaturation, 0, 0.5, 10);
 			s *= 100;
-			s = (50 < s) ? 50 : s;
 			s = this._roundNum(s, 0);
+			if(50 < s){
+				s = 50;
+			}
+			console.log(s);
 			scoreColor = 'hsl(0, ' + s + '%, 50%)';
 		}else if(0 < this.state.score){ //plus
-			s = easing(scoreSaturation, 0, 1, 1000);
+			s = linear(scoreSaturation, 0, 0.4, 100);
 			s *= 100;
 			s = this._roundNum(s, 0);
-			//console.log(s);
 			scoreColor = 'hsl(100, ' + s + '%, 50%)';
 		}else{
 			scoreColor = 'hsl(100, 0%, 50%)';
