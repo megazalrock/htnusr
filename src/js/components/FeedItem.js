@@ -84,7 +84,6 @@ export default class FeedItem extends React.Component{
 			if(50 < s){
 				s = 50;
 			}
-			console.log(s);
 			scoreColor = 'hsl(0, ' + s + '%, 50%)';
 		}else if(0 < this.state.score){ //plus
 			s = linear(scoreSaturation, 0, 0.4, 100);
@@ -106,9 +105,13 @@ export default class FeedItem extends React.Component{
 
 		var entryImage = (() => {
 			var html = this.props.data.html.replace(/src="http:\/\/feeds.feedburner.com\/.*?"/, '');
-			var entryImageSrc = $(html).find('img.entry-image').attr('src');
-			if(entryImageSrc){
-				return (<img src={entryImageSrc} className="entryImage" alt=""/>);
+			try{
+				var entryImageSrc = $(html).find('img.entry-image').attr('src');
+				if(entryImageSrc){
+					return (<img src={entryImageSrc} className="entryImage" alt=""/>);
+				}
+			}catch(e){
+				console.log(this.props.data.html);
 			}
 		})();
 
