@@ -76,8 +76,7 @@ class Users extends DataBase{
 	 * @return integer
 	 */
 	private function calc_user_score($star_count, $followers){
-		//$color_star = $star['star_green'] * 2 + $star['star_red'] * 4 + $star['star_blue'] * 25 + $star['star_purple'] * 256;
-		//$yellow_star_log = log($star['star_yellow'], 10);
+		//黄 + 緑 * 2 + 赤 * 4 + 青 * 25 + 紫 * 256
 		if(is_array($star_count)){
 			$star = $star_count['star_yellow'] + $star_count['star_green'] * 2 + $star_count['star_red'] * 4 + $star_count['star_blue'] * 25 + $star_count['star_purple'] * 256;
 		}else{
@@ -90,10 +89,6 @@ class Users extends DataBase{
 		if($followers === false){
 			$followers = 0;
 		}
-		/*if($yellow_star_log < 0){
-			$yellow_star_log = 0;
-		}*/
-		//return $color_star + $yellow_star_log + $followers;
 		return $star_log + $followers;
 	}
 
@@ -154,23 +149,6 @@ class Users extends DataBase{
 		}
 	}
 
-	public function update_user_failed($user){
-		$user['priority'] = 0;
-		$user['last_updated'] = time();
-		try{
-			$dbh = $this->connection();
-			$sth = $dbh->prepare('UPDATE ' . $this->user_table_name . ' SET last_updated=:last_updated, priority=:priority WHERE name=:userid');
-			$sth->bindParam(':userid', $user['name'], PDO::PARAM_STR);
-			$sth->bindValue(':priority', 0, PDO::PARAM_INT);
-			$sth->bindParam(':last_updated', $user['last_updated'], PDO::PARAM_INT);
-			$result = $sth->execute();
-			echo "\e[31m" . $user['name'] . "\e[0m ";
-			return $user;
-		}catch(PDOException $e){
-			echo $e->getMessage();
-		}
-	}
-
 	/**
 	 * ユーザーのスターをまとめて更新
 	 * @param  array $queue_list 更新対象
@@ -181,8 +159,6 @@ class Users extends DataBase{
 		$start = microtime(true);
 		$result = HatenaAPI::fetch_hateb_users_info($queue_list);
 		foreach ($queue_list as $key => $user) {
-			//$star_count = HatenaAPI::get_hateb_user_star($user['name']);
-			//$followers = HatenaAPI::get_hateb_user_follower($user['name']);
 			$star_count = $result[$user['name']]['star'];
 			$followers = $result[$user['name']]['followers'];
 			if($star_count !== false && $followers !== false){
@@ -200,7 +176,7 @@ class Users extends DataBase{
 	 * @return array
 	 */
 	public function get_users_data($ordeyby = 'score',$limit = false){
-		$query = 'SELECT * FROM ' . $this->user_table_name;//. ' ORDER BY ' . $ordeyby . ' DESC, priority DESC';
+		$query = 'SELECT * FROM ' . $this->user_table_name;
 		if(is_numeric($limit)){
 			$query .=  ' LIMIT 0, :limit';
 		}
@@ -294,10 +270,6 @@ class Users extends DataBase{
 		}
 	}
 
-	private function get_karma_sum_from_url($url, $type){
-		return $this->cache->get_cache($url);
-	}
-
 	/**
 	 * ユーザーリストから合計カルマを取得
 	 * @param  array $users          ユーザーIDのリスト
@@ -326,8 +298,6 @@ class Users extends DataBase{
 		}catch(PDOException $e){
 			echo $e->getMessage();
 		}
-
-		
 	}
 
 	/**
@@ -416,31 +386,6 @@ class Users extends DataBase{
 			}
 			$followers = $user['followers'];
 			$this->update_user_star($user, $star_count, $followers, true);
-			//$dbh = $this->connection();
-			/*$sth = $dbh->prepare('UPDATE ' . $this->user_table_name . ' SET score=:score, score_log10=:score_log10 WHERE name=:name');
-			if(is_null($user['star_yellow']) || is_null($user['star_green']) || is_null($user['star_red']) || is_null($user['star_blue']) || is_null($user['star_purple'])){
-				$star_count = false;
-			}else{
-				$star_count = array(
-					'star_yellow' => $user['star_yellow'],
-					'star_green' => $user['star_green'],
-					'star_red' => $user['star_red'],
-					'star_blue' => $user['star_blue'],
-					'star_purple' => $user['star_purple'],
-				);
-			}
-			$score = $this->calc_user_score($star_count, $user['followers']);
-			//var_dump($score);
-			//var_dump($user['followers']);
-			$score_log10 = log($score, 10);
-			if($score_log10 < 0){
-				$score_log10 = 0;
-			}
-			$sth->bindValue(':name', $user['name'], PDO::PARAM_STR);
-			$sth->bindValue(':score', $score, PDO::PARAM_STR);
-			$sth->bindValue(':score_log10', $score_log10, PDO::PARAM_STR);
-			$sth->execute();
-			echo $user['name'] . ' ';*/
 		}
 	}
 
@@ -460,29 +405,4 @@ class Users extends DataBase{
 		}
 		return $statics;
 	}
-
-	/**
-	 * まとめて更新
-	 * @param  int $limit 一度に更新するユーザーの数
-	 * @return boolean
-	 */
-	public function update_all($limit = 20){
-		echo 'update all start';
-		$queue_list = $this->get_star_update_queue_list($limit);
-		if(!empty($queue_list)){
-			$queue_list = $this->update_users_star($queue_list);
-			$queue_list = $this->update_users_karma($queue_list);
-		}
-	}
-
-	public function update_star($limit = 20){
-		$queue_list = $this->get_star_update_queue_list($limit);
-		$queue_list = $this->update_users_star($queue_list);
-	}
-
-	public function update_karma($limit = 20, $all = false){
-		$queue_list = $this->get_karma_update_queue_list($limit, $all);
-		$queue_list = $this->update_users_karma($queue_list);
-	}
-
 }

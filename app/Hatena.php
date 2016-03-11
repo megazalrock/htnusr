@@ -9,24 +9,12 @@ class HatenaAPI{
 	const HATEB_USER_FOLLOWER_PAGE = 'follower';
 	const TIMEOUT = 10;
 
-	public function get_hateb_score($url){		
-		$json = @file_get_contents(sprintf(self::HATEB_API, $url));
-		if($json === false){
-			return false;
-		}
-		$json = json_decode($json, true);
-	}
-
-	public function get_hateb_user_star($userid){
-		try{
-			$json = @file_get_contents(sprintf(self::STAR_API, rawurlencode(sprintf(self::HATEB_USER_PAGE, $userid))));
-			return self::parse_hateb_user_star($json);
-		}catch(Exception $e){
-			return 0;
-		}
-	}
-
-	public function parse_hateb_user_star($json){
+	/**
+	 * スターのjson文字列をパース
+	 * @param  string $json json文字列
+	 * @return array
+	 */
+	private function parse_hateb_user_star($json){
 		$json = json_decode($json, true);
 		if(!isset($json['count']['purple'])){
 			$json['count']['purple'] = 0;
@@ -44,7 +32,6 @@ class HatenaAPI{
 			$json['count']['yellow'] = 0;
 		}
 		return array(
-			//'score' => (float) self::calc_star($json['count']) + 1,
 			'star_purple' => (int) $json['count']['purple'],
 			'star_blue' => (int) $json['count']['blue'],
 			'star_red' => (int) $json['count']['red'],
@@ -53,58 +40,13 @@ class HatenaAPI{
 		);
 	}
 
-	//黄 + 緑 * 2 + 赤 * 4 + 青 * 25 + 紫 * 256
-	private function calc_star($star_count){
-		$result = 0;
-		if(!is_array($star_count)){
-			return 0;
-		}
-		foreach ($star_count as $star => $count) {
-			switch ($star) {
-				case 'purple':
-					$result += $count * 256;
-				break;
-				case 'blue':
-					$result += $count * 25;
-				break;
-				case 'red':
-					$result += $count * 4;
-				break;
-				case 'green':
-					$result += $count * 2;
-				break;
-				default:
-					$result += ($count / 100);
-				break;
-			}
-		}
-		return $result;
-	}
-
-	public function get_hateb_user_follower($userid){
-		$follower_url = sprintf(self::HATEB_USER_PAGE . self::HATEB_USER_FOLLOWER_PAGE, $userid);
-		$curl = new CurlWrapper();
-		$curl->set_url($follower_url);
-		//$html = $curl->fetch();
-		var_dump($curl->fetch());
-		$curl->set_url(sprintf(self::HATEB_USER_PAGE . self::HATEB_USER_FOLLOWER_PAGE, 'megazalrock'));
-		var_dump($curl->fetch());
-		/*$ch = curl_init(); // はじめ
-		$headers = array(
-		    "User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:26.0) Gecko/20100101 Firefox/26.0"
-		);
-		curl_setopt($ch, CURLOPT_URL, $follower_url); 
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-		$html =  curl_exec($ch);
-		$info = curl_getinfo($ch);
-		curl_close($ch); //終了*/
-
-		return self::parse_hateb_user_follower($html, $userid);
-	}
-
-	public function parse_hateb_user_follower($html, $userid){
+	/**
+	 * はてブのプロフィールページのHTMLのパース
+	 * @param  string $html   html文字列
+	 * @param  string $userid ユーザーのID
+	 * @return int
+	 */
+	private function parse_hateb_user_follower($html, $userid){
 		$dom = new DOMDocument();
 		@$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
 		$xpath = new DOMXPath($dom);
@@ -115,33 +57,6 @@ class HatenaAPI{
 			$follower = 0;
 		}
 		return (int) $follower;
-	}
-
-	/**
-	 * はてなユーザーの情報を取得
-	 * @param  string $userid ユーザーID
-	 * @return array
-	 */
-	public function fetch_hateb_user_info($userid){
-		$curl = new CurlWrapper();
-		$follower_html = $curl->fetch(sprintf(self::HATEB_USER_PAGE . self::HATEB_USER_FOLLOWER_PAGE, $userid));
-		$is_follower_ok = $curl->is_ok();
-		$star_json = $curl->fetch(sprintf(self::STAR_API, rawurlencode(sprintf(self::HATEB_USER_PAGE, $userid))));
-		$is_star_ok = $is_ok && $curl->is_ok();
-		if($is_follower_ok){
-			$followers = self::parse_hateb_user_follower($follower_html, $userid);
-			$result['followers'] = $followers;
-		}else{
-			$result['followers'] = false;
-		}
-
-		if($is_star_ok){
-			$star = self::parse_hateb_user_star($star_json);
-			$result['star'] = $star;
-		}else{
-			$result['star'] = false;
-		}
-		return $result;
 	}
 
 	/**
@@ -219,15 +134,4 @@ class HatenaAPI{
 
 		return $result;
 	}
-
-	private function get_curl_handler($url, $type){
-		$ch = curl_init();
-		$header = array("User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36");
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-		return $ch;
-	}
-
 }
