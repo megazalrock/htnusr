@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import _ from 'lodash';
-const strage = window.localStorage;
 export default class Users {
 	constructor(){
 		this.addUsersAjax = null;
@@ -9,9 +8,6 @@ export default class Users {
 	}
 
 	abort(){
-		if(!_.isNull(this.addUsersAjax) && _.isFunction(this.addUsersAjax.abort)){
-			this.addUsersAjax.abort();
-		}
 		if(!_.isNull(this.getScoreAjax) &&_.isFunction(this.getScoreAjax.abort)){
 			this.getScoreAjax.abort();
 		}
@@ -20,25 +16,6 @@ export default class Users {
 		}
 	}
 
-	addUsers(users){
-		var deferred = $.Deferred();
-		this.addUsersAjax = $.ajax({
-			url:'add_users.php',
-			dataType: 'text',
-			type: 'post',
-			data: {
-				users: users.join(',')
-			}
-		})
-		.then(() =>{
-			deferred.resolve();
-		})
-		.fail((...args) => {
-			deferred.reject(...args);
-		});
-		return deferred.promise();
-	}
-	
 	getScore(data, type){
 		var deferred = $.Deferred();
 		var tags = [];
