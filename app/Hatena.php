@@ -1,6 +1,7 @@
 <?php
 date_default_timezone_set('Asia/Tokyo');
 require_once (dirname(__FILE__) . '/Constant.php');
+require_once (dirname(__FILE__) . '/lib/CurlWrapper.php');
 class HatenaAPI{
 	const STAR_API = 'http://s.hatena.ne.jp/blog.json?uri=%s';
 	const HATEB_USER_PAGE = 'http://b.hatena.ne.jp/%s/';
@@ -44,11 +45,11 @@ class HatenaAPI{
 		}
 		return array(
 			//'score' => (float) self::calc_star($json['count']) + 1,
-			'purple' => (int) $json['count']['purple'],
-			'blue' => (int) $json['count']['blue'],
-			'red' => (int) $json['count']['red'],
-			'green' => (int) $json['count']['green'],
-			'yellow' => (int) $json['count']['yellow']
+			'star_purple' => (int) $json['count']['purple'],
+			'star_blue' => (int) $json['count']['blue'],
+			'star_red' => (int) $json['count']['red'],
+			'star_green' => (int) $json['count']['green'],
+			'star_yellow' => (int) $json['count']['yellow']
 		);
 	}
 
@@ -82,7 +83,13 @@ class HatenaAPI{
 
 	public function get_hateb_user_follower($userid){
 		$follower_url = sprintf(self::HATEB_USER_PAGE . self::HATEB_USER_FOLLOWER_PAGE, $userid);
-		$ch = curl_init(); // はじめ
+		$curl = new CurlWrapper();
+		$curl->set_url($follower_url);
+		//$html = $curl->fetch();
+		var_dump($curl->fetch());
+		$curl->set_url(sprintf(self::HATEB_USER_PAGE . self::HATEB_USER_FOLLOWER_PAGE, 'megazalrock'));
+		var_dump($curl->fetch());
+		/*$ch = curl_init(); // はじめ
 		$headers = array(
 		    "User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:26.0) Gecko/20100101 Firefox/26.0"
 		);
@@ -92,7 +99,7 @@ class HatenaAPI{
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 		$html =  curl_exec($ch);
 		$info = curl_getinfo($ch);
-		curl_close($ch); //終了
+		curl_close($ch); //終了*/
 
 		return self::parse_hateb_user_follower($html, $userid);
 	}
@@ -110,9 +117,40 @@ class HatenaAPI{
 		return (int) $follower;
 	}
 
-	public function fetch_hateb_user_info($user_list){
+	/**
+	 * はてなユーザーの情報を取得
+	 * @param  string $userid ユーザーID
+	 * @return array
+	 */
+	public function fetch_hateb_user_info($userid){
+		$curl = new CurlWrapper();
+		$follower_html = $curl->fetch(sprintf(self::HATEB_USER_PAGE . self::HATEB_USER_FOLLOWER_PAGE, $userid));
+		$is_follower_ok = $curl->is_ok();
+		$star_json = $curl->fetch(sprintf(self::STAR_API, rawurlencode(sprintf(self::HATEB_USER_PAGE, $userid))));
+		$is_star_ok = $is_ok && $curl->is_ok();
+		if($is_follower_ok){
+			$followers = self::parse_hateb_user_follower($follower_html, $userid);
+			$result['followers'] = $followers;
+		}else{
+			$result['followers'] = false;
+		}
+
+		if($is_star_ok){
+			$star = self::parse_hateb_user_star($star_json);
+			$result['star'] = $star;
+		}else{
+			$result['star'] = false;
+		}
+		return $result;
+	}
+
+	/**
+	 * 複数のはてなユーザーの情報を取得
+	 * @param  array $user_list ユーザーの配列
+	 * @return array
+	 */
+	public function fetch_hateb_users_info($user_list){
 		$mh = curl_multi_init();
-		$header = array("User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36");
 		$connection = array();
 		foreach ($user_list as $key => $user) {
 			$userid = $user['name'];
@@ -160,7 +198,9 @@ class HatenaAPI{
 		foreach ($connection as $userid => $ch_set) {
 			$result[$userid] = array();
 			foreach ($ch_set as $type => $ch) {
-				if($error = curl_error($connection[$userid][$type]) == ''){
+				$info = curl_getinfo($ch);
+				$error = curl_error($connection[$userid][$type]);
+				if($error == '' && $info['http_code'] == 200){
 					$result[$userid][$type] = curl_multi_getcontent($connection[$userid][$type]);
 					if($type == 'star'){
 						$result[$userid][$type] = self::parse_hateb_user_star($result[$userid][$type]);

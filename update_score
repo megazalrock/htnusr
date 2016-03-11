@@ -1,0 +1,10 @@
+#!/usr/local/bin/php
+<?php
+date_default_timezone_set('Asia/Tokyo');
+require_once (dirname(__FILE__) . '/app/Constant.php');
+require_once (dirname(__FILE__) . '/app/Hatena.php');
+require_once (dirname(__FILE__) . '/app/Users.php');
+$users = new Users();
+$users->update_scores($users->get_score_update_queue_list());
+$users->update_users_karma($users->get_karma_update_queue_list());
+?>
