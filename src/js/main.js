@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import React from 'react';
 import ReactDom from 'react-dom';
 import Feed from './components/Feed';
@@ -13,6 +14,9 @@ class BetterHotentry{
 		storageCache.sweepCache((key, value) => {
 			return value.expires < storageCache.getNow();
 		});
+		/*$(window).scroll((e) => {
+			console.log($(window).scrollTop());
+		});*/
 	}
 
 	init(){
