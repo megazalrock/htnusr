@@ -365,9 +365,6 @@ class Users extends DataBase{
 		$score_log10_list = $sth->fetchAll(PDO::FETCH_COLUMN);
 		$score_log10_list = array_unique($score_log10_list);
 		$score_log10_list = array_merge(array_diff($score_log10_list, array("")));
-		unset($score_log10_list[0]);
-		unset($score_log10_list[count($score_log10_list) - 1]);
-		$score_log10_list = array_merge(array_diff($score_log10_list, array("")));
 		if(count($score_log10_list) % 2 === 0){
 			$median = ($score_log10_list[ floor((count($score_log10_list) / 2) - 1) ] + $score_log10_list[ floor((count($score_log10_list) / 2)) ]) / 2;
 		}else{
