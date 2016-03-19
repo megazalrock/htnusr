@@ -6,7 +6,7 @@ class Cache {
 	static private $cache_base_dir;
 	static private $is_gzip_enabled;
 
-	public function __construct($expires, $is_gzip_enabled = false, $cache_dir = ''){
+	public function __construct($expires, $is_gzip_enabled = true, $cache_dir = ''){
 		$this->cache_expires = $expires;
 		$this->cache_base_dir = dirname(__FILE__) . '/../../cache';
 		$this->cache_dir = $this->cache_base_dir . $cache_dir;
@@ -26,9 +26,16 @@ class Cache {
 		}
 	}
 
-	private function get_cache_file_path($name){
+	private function get_cache_file_path($name, $is_gzip_enabled = null){
 		$this->make_cache_dir();
-		return $this->cache_dir . '/' . sha1($name);
+		$cache_file_path = $this->cache_dir . '/' . sha1($name);
+		if(is_null($is_gzip_enabled)){
+			$is_gzip_enabled = $this->is_gzip_enabled;
+		}
+		if($is_gzip_enabled){
+			$cache_file_path .= '.gz';
+		}
+		return $cache_file_path;
 	}
 
 	public function get_file_time($file_path){
@@ -42,7 +49,7 @@ class Cache {
 	public function has_cache($name){
 		$cache_file_path = $this->get_cache_file_path($name);
 		$file_time = $this->get_file_time($cache_file_path);
-		return (file_exists($cache_file_path) && $file_time && $file_time < time() - $this->cache_expires);
+		return (file_exists($cache_file_path) && $file_time && time() < $file_time + $this->cache_expires);
 	}
 
 	/**
@@ -55,9 +62,6 @@ class Cache {
 	 */
 	public function respond($name, $content_type, $nocache_callback, $call_back_param_arr = array()){
 		$cache_file_path = $this->get_cache_file_path($name);
-		if($this->is_gzip_enabled){
-			$cache_file_path .= '.gz';
-		}
 		$file_time = $this->get_file_time($cache_file_path);
 		header("Content-Type: " . $content_type);
 		if($this->has_cache($name)){
@@ -73,7 +77,7 @@ class Cache {
 		}else{
 			$is_cache = false;
 			$result = call_user_func_array($nocache_callback, $call_back_param_arr);
-			$this->save_cache($name, $result);
+			//$this->save_cache($name, $result);
 			header('Last-Modified: ' . date('r'));
 			if($this->is_gzip_enabled){
 				ob_start('ob_gzhandler');
@@ -82,15 +86,19 @@ class Cache {
 			if($this->is_gzip_enabled){
 				ob_end_flush();
 			}
+			$this->save_cache($name, $result);
 		}
 		return $is_cache;
 	}
 
-	public function save_cache($name, $str){
+	public function save_cache($name, $str, $force_gzip = false){
 		$this->make_cache_dir();
-		$cache_file_path = $this->get_cache_file_path($name);
-		if($this->is_gzip_enabled){
-			$cache_file_path .= '.gz';
+		if($force_gzip){
+			$cache_file_path = $this->get_cache_file_path($name, true);
+		}else{
+			$cache_file_path = $this->get_cache_file_path($name);
+		}
+		if($force_gzip || $this->is_gzip_enabled){
 			$gzip = gzopen( $cache_file_path , 'w9' ) ;
 			gzwrite( $gzip , $str ) ;
 			gzclose( $gzip ) ;
