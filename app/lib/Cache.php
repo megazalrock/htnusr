@@ -53,14 +53,14 @@ class Cache {
 	 * @param  function	$call_back_param_arr コールバックの引数の配列
 	 * @return [type]
 	 */
-	public function respond($name, $content_type, $nocache_callback, $call_back_param_arr = array()){
+	public function respond($name, $content_type, $nocache_callback, $call_back_param_arr = array(), $force_nocache = false){
 		$cache_file_path = $this->get_cache_file_path($name);
 		if($this->is_gzip_enabled){
 			$cache_file_path .= '.gz';
 		}
 		$file_time = $this->get_file_time($cache_file_path);
 		header("Content-Type: " . $content_type);
-		if($this->has_cache($name)){
+		if(!$force_nocache && $this->has_cache($name)){
 			//$result = file_get_contents($cache_file_path);
 			$is_cache = $file_time;
 			header('X-Mgzl-From-Cache: True');

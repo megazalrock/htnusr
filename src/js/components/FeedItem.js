@@ -239,9 +239,9 @@ export default class FeedItem extends React.Component{
 		})();
 
 		var entryImage = (() => {
-			var entryImageSrc = this.props.data.html.match(/"(http:\/\/cdn-ak\.b\.st-hatena\.com\/entryimage\/.*?)"/);
+			var entryImageSrc = this.props.data.html['entry-image'];
 			if(entryImageSrc){
-				return (<img src={entryImageSrc[1]} className="entryImage" alt=""/>);
+				return (<img src={entryImageSrc} className="entryImage" alt=""/>);
 			}
 		})();
 

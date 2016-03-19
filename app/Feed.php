@@ -34,20 +34,36 @@ Class Feed extends DataBase{
 		return $feed;
 	}
 
-	private function parse_feed_data($type){
+	private function parse_feed_data_html($html){	
+		$dom = new DOMDocument();
+		$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+		$xpath = new DOMXPath($dom);
+		$query = '//img[@class="entry-image"]/@src';
+		$entry_image = $xpath->evaluate('string(' . $query . ')');
+		if(empty($entry_image)){
+			$entry_image = null;
+		}
+		return array(
+			'entry-image' => $entry_image
+		);
+	}
+
+	public function parse_feed_data($type){
 		$feed = $this->fetch_feed($type);
 		$xml_object = new SimpleXMLElement($feed, LIBXML_NOCDATA);
 		$items = array();
 		foreach ($xml_object->item as $_item) {
 			$link = (string) $_item->link;
 			$date = strtotime($_item->children('dc', true)->date);
+			$html = $_item->children('content', true);
+			$html_array =  $this->parse_feed_data_html($html);
 			$items[] = array(
 				'title' => (string) $_item->title,
 				'link' => $link,
 				'description' => (string) $_item->description,
 				'date' => $date,
 				'category' => (string) $_item->children('dc', true)->subject,
-				'html' => (string) $_item->children('content', true),
+				'html' => (string) serialize($html_array),
 				'id' => sha1($link . $date)
 			);
 		}
@@ -120,6 +136,13 @@ Class Feed extends DataBase{
 			$sth = $dbh->prepare('SELECT * FROM ' . $table_name . ' ORDER BY `date` DESC');
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($result as $key => $feed_item) {
+				if(mb_strstr($feed_item['html'], '<blockquote')){
+					$result[$key]['html'] = $this->parse_feed_data_html($feed_item['html']);
+				}else{
+					$result[$key]['html'] = unserialize($feed_item['html']);
+				}
+			}
 			if($encodeJson){
 				return json_encode($result);
 			}else{
