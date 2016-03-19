@@ -85,7 +85,6 @@ Class Feed extends DataBase{
 		}catch(PDOException $e){
 			echo $e->getMessage();
 		}
-
 	}
 
 	private function save_feed($feed, $type){
@@ -94,7 +93,8 @@ Class Feed extends DataBase{
 		}else if($type === 'new'){
 			$table_name = $this->feed_new_table_name;
 		}
-		$max_index = $this->get_max_index('hotentry');
+		$feed = array_reverse($feed);
+		$max_index = $this->get_max_index($type);
 		try{
 			$sql = 'INSERT IGNORE INTO ' . $table_name . ' (id, title, link, description, date, category, html, `index`) VALUES ';
 			$values = array();
@@ -120,20 +120,23 @@ Class Feed extends DataBase{
 		}catch(PDOException $e){
 			echo $e->getMessage();
 		}
-
 		$this->update_index($type);
 	}
 
 
-	public function get_feed_data($type, $encodeJson = true){
+	public function get_feed_data($type, $encodeJson = true, $order = 'ASC'){
 		if($type === 'hotentry'){
 			$table_name = $this->feed_hot_table_name;
 		}else if($type === 'new'){
 			$table_name = $this->feed_new_table_name;
 		}
 		try{
+			$query = 'SELECT * FROM ' . $table_name . ' ORDER BY `index`';
+			if($order == 'DESC'){
+				$query = $query . ' ' . $order;
+			}
 			$dbh = $this->connection();
-			$sth = $dbh->prepare('SELECT * FROM ' . $table_name . ' ORDER BY `date` DESC');
+			$sth = $dbh->prepare($query);
 			$sth->execute();
 			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
 			foreach ($result as $key => $feed_item) {
@@ -153,13 +156,17 @@ Class Feed extends DataBase{
 		}
 	}
 
+	public function get_feed_json($type){
+		return $this->get_feed_data($type, true, 'DESC');
+	}
+
 	private function update_index($type){
 		if($type === 'hotentry'){
 			$table_name = $this->feed_hot_table_name;
 		}else if($type === 'new'){
 			$table_name = $this->feed_new_table_name;
 		}
-		$feed = $this->get_feed_data($type, false);
+		$feed = $this->get_feed_data($type, false, 'ASC');
 		foreach ($feed as $key => $feed_item) {
 			//$index = self::FEED_MAX_NUM - $key;
 			try{
@@ -205,8 +212,8 @@ Class Feed extends DataBase{
 
 			try{
 				$dbh = $this->connection();
-				$sth = $dbh->prepare('DELETE FROM ' . $table_name . ' WHERE `index` >= :index');
-				$sth->bindValue(':index', self::FEED_MAX_NUM, PDO::PARAM_INT);
+				$sth = $dbh->prepare('DELETE FROM ' . $table_name . ' WHERE `index` < :index');
+				$sth->bindValue(':index', $over_num , PDO::PARAM_INT);
 				$sth->execute();
 			}catch(PDOException $e){
 				echo $e->getMessage();
