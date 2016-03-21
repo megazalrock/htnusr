@@ -7,16 +7,13 @@ import StorageCache from './StorageCache';
 class BetterHotentry{
 	constructor(){
 		this.rssUrls = {
-			hotentry: 'http://feeds.feedburner.com/hatena/b/hotentry',//'http://b.hatena.ne.jp/hotentry?mode=rss',//http://feeds.feedburner.com/hatena/b/hotentry
+			hotentry: 'http://feeds.feedburner.com/hatena/b/hotentry',
 			new: 'http://b.hatena.ne.jp/entrylist?mode=rss'
 		};
 		var storageCache = new StorageCache();
 		storageCache.sweepCache((key, value) => {
 			return value.expires < storageCache.getNow();
 		});
-		/*$(window).scroll((e) => {
-			console.log($(window).scrollTop());
-		});*/
 	}
 
 	init(){

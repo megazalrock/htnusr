@@ -3,7 +3,7 @@ import _ from 'lodash';
 import React from 'react';
 import ReactDom from 'react-dom';
 
-export default class FeedItem extends React.Component{
+export default class FeedItemBookmarkComments extends React.Component{
 	constructor(props){
 		super(props);
 		this.bookmarkCommentsBtnTexts = {
