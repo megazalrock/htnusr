@@ -11,7 +11,7 @@ var watchify = require('watchify');
 var uglify = require('gulp-uglify');
 
 var duration = require('gulp-duration');
-var less = require('gulp-less');
+var lessCompile = require('gulp-less');
 var minifyCss = require('gulp-minify-css');
 var LessPluginAutoprefix = require('less-plugin-autoprefix');
 var autoprefix = new LessPluginAutoprefix({browsers: ['last 2 versions']});
@@ -90,10 +90,17 @@ gulp.task('browserify', function () {
 	return bundleJs(bundler);
 });
 
+gulp.task('uglify', function () {
+	return gulp.src(js.dest.path())
+		.pipe(uglify())
+		.pipe(gulp.dest(js.dest.dir));
+		/*.pipe(notify( jsMainFileName + ' is compressed !'));*/
+});
+
 gulp.task('less', function () {
 	return gulp.src(less.src.path())
 	.pipe(sourcemaps.init())
-	.pipe(less({
+	.pipe(lessCompile({
 		plugins: [autoprefix],
 		paths: [less.src.dir]
 	}))
@@ -102,9 +109,9 @@ gulp.task('less', function () {
 	.pipe(notify( less.dest.filename + ' is compiled !'));
 });
 
-gulp.task('lessBuild', function () {
+gulp.task('lessMinify', function () {
 	return gulp.src(less.src.path())
-	.pipe(less({
+	.pipe(lessCompile({
 		plugins: [autoprefix],
 		paths: [less.src.dir]
 	}))
@@ -113,48 +120,76 @@ gulp.task('lessBuild', function () {
 });
 
 
-gulp.task('uglify', ['browserify'], function () {
-	return gulp.src(js.dest.path())
-		.pipe(uglify())
-		.pipe(gulp.dest(js.dest.dir))
-		.pipe(duration('compressed ' + js.src.filename));
-		/*.pipe(notify( jsMainFileName + ' is compressed !'));*/
+gulp.task('cleanJs', function () {
+	return del.bind([
+		js.dest.dir + '**/*'
+	]);
 });
 
-gulp.task('clean', function () {
+gulp.task('cleanLess', function () {
 	return del.bind([
-		js.dest.dir + '**/*',
 		less.dest.dir + '**/*'
 	]);
 });
 
-gulp.task('buildComplete', function () {
+gulp.task('buildCompleteJs', function () {
 	notifier.notify({
-		title : 'Build complited !!!!',
-		message : [js.dest.path(), less.dest.path()].join('\n'),
+		title : 'JS Build complited !!!!',
+		message : [js.dest.path(), js.dest.path() + '.gz'].join('\n'),
 		icon: 'node_modules/gulp-notify/assets/gulp.png'
 	}, function (err) {
 		console.log(err);
 	});
 });
 
-gulp.task('gzip', function(){
+gulp.task('buildCompleteLess', function () {
+	notifier.notify({
+		title : 'LESS Build complited !!!!',
+		message : [less.dest.path(), less.dest.path() + '.gz'].join('\n'),
+		icon: 'node_modules/gulp-notify/assets/gulp.png'
+	}, function (err) {
+		console.log(err);
+	});
+});
+
+
+gulp.task('gzipJs', function(){
 	gulp.src(js.dest.path())
 		.pipe(gzip())
 		.pipe(gulp.dest(js.dest.dir));
+});
+
+gulp.task('gzipLess', function(){
 
 	gulp.src(less.dest.path())
 		.pipe(gzip())
 		.pipe(gulp.dest(less.dest.dir));
 });
 
+gulp.task('buildJS' , function(callback){
+	return runSequence(
+		'cleanJs',
+		'browserify',
+		'uglify',
+		'gzipJs',
+		'buildCompleteJs',
+		callback
+	);
+});
+
+gulp.task('buildLess' , function(callback){
+	return runSequence(
+		'cleanLess',
+		'lessMinify',
+		'gzipLess',
+		'buildCompleteLess',
+		callback
+	);
+});
 
 gulp.task('build', function (callback) {
 	return runSequence(
-		'clean',
-		['uglify', 'lessBuild'],
-		'gzip',
-		'buildComplete',
+		['buildJS', 'buildLess'],
 		callback
 	);
 });
