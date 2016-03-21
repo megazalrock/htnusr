@@ -1,0 +1,48 @@
+.scoreViewer{
+	.form{
+		width: 100%;
+		font-size: 0.8rem;
+		display: flex;
+		flex-direction: wrap;
+		justify-content: space-between;
+		.urlInput{
+			font-size: 0.75rem;
+			box-sizing: border-box;
+			height: 28px;
+			width: 100%;
+			min-width: 20em;
+		}
+		.submitBtn{
+		}
+	}
+	.resultTable{
+		margin: @baseMargin * 2 0;
+		width: 100%;
+		.score,
+		.bookmarkCountBox{
+			width: 10%;
+			border-right: 1px solid #CCC;
+			text-align: center;
+		}
+		thead{
+			font-size: 0.75rem;
+			td{
+				text-align: center;
+			}
+		}
+		tbody{
+			tr{
+				td{
+					padding: 0.2em 0;
+					border-top: 1px solid #CCC;
+					&.bookmarkCountBox{
+						font-size: 0.8ren;
+					}
+					&.pageTitle{
+						padding-left: 1em;
+					}
+				}
+			}
+		}
+	}
+}

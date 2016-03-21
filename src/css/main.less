@@ -1,7 +1,6 @@
 @import 'reset';
-@baseMargin: 0.5rem;
-@hatenaColor: #008ede;
-@btnBorderColor: rgba(0, 0, 0, 0.5);
+@import 'scoreViewer';
+@import 'valiables.less';
 html, body{
 	font-size: 15px;
 	height: 100%;
@@ -76,7 +75,7 @@ h3{
 			color: @btnSelectedFontColor;
 		}
 	}*/
-	&.selected{
+	&.selected
 		box-shadow: @btnSelectedShadow;
 		background: @btnSelectedBgColor;
 		color: @btnSelectedFontColor;
@@ -84,11 +83,29 @@ h3{
 		animation-fill-mode: forwards;*/
 		border: @btnBorder;
 	}
+	&:active,
+	&.active{
+		.selected;
+	}
 	&:hover{
 		border: @btnBorder;
 		text-decoration: none;
 	}
 }
+
+.bookmarkCount{
+	color: #ff2d2d;
+	font-weight: bold;
+	background: #fdd;
+	opacity:0.8;
+	.count{
+		font-size: 110%;
+	}
+	&:hover{
+		text-decoration: none;
+	}
+}
+
 .ui{
 	display: flex;
 	flex-flow:row wrap;
@@ -211,18 +228,6 @@ h3{
 					line-height: @height;
 					height: @height;
 					padding: 2px 4px;
-				}
-				.bookmarkCount{
-					color: #ff2d2d;
-					font-weight: bold;
-					background: #fdd;
-					opacity:0.8;
-					.count{
-						font-size: 110%;
-					}
-					&:hover{
-						text-decoration: none;
-					}
 				}
 				.score{
 					color: #FFF;

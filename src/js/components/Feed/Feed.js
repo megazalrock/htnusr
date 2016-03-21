@@ -1,7 +1,7 @@
 /* global ga */
 import $ from 'jquery';
 import React from 'react';
-import MainMenu from './MainMenu';
+import FeedMenu from './FeedMenu';
 import FeedItem from './FeedItem';
 
 const strage = window.localStorage;
@@ -78,8 +78,8 @@ export default class Feed extends React.Component{
 			);
 		});
 		return(
-			<div className="app">
-				<MainMenu mode={this.props.route.mode} route={this.props.route} handleSetViewMode={this.setViewMode.bind(this)} viewMode={this.state.viewMode} />
+			<div className="feed">
+				<FeedMenu mode={this.props.route.mode} route={this.props.route} handleSetViewMode={this.setViewMode.bind(this)} viewMode={this.state.viewMode} />
 				<div className={'feedList' + (this.state.isLoading ? ' loading' : '')}>
 					<div className="loadingAnime"></div>
 					<div className={'feedListBox view-' + (this.state.viewMode)}>
