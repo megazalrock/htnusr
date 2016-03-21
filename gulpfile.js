@@ -24,6 +24,8 @@ var runSequence = require('run-sequence');
 var notifier = require('node-notifier');
 var notify = require('gulp-notify');
 
+var dirnameRegExp = new RegExp(__dirname + '/', 'g');
+
 var FilePath = function(dir, filename){
 	this.dir = dir;
 	this.filename = filename;
@@ -54,11 +56,11 @@ var props = {
 function bundleJs(bundler) {
 	return bundler.bundle()
 		.on('error', function (e) {
-			console.log(e.message);
+			console.log(e.message.replace(dirnameRegExp, ''));
 			console.log(e.codeFrame);
 			notifier.notify({
 				title : 'Error : ' + path.basename(e.filename) + ' ' + e.loc.line + ':' + e.loc.column,
-				message : e.filename,
+				message : e.filename.replace(dirnameRegExp, ''),
 				icon: 'node_modules/gulp-notify/assets/gulp-error.png'
 			}, function (err) {
 				console.log(err);
@@ -100,10 +102,24 @@ gulp.task('uglify', function () {
 gulp.task('less', function () {
 	return gulp.src(less.src.path())
 	.pipe(sourcemaps.init())
-	.pipe(lessCompile({
-		plugins: [autoprefix],
-		paths: [less.src.dir]
-	}))
+	.pipe(
+		lessCompile({
+			plugins: [autoprefix],
+			paths: [less.src.dir]
+		})
+		.on('error', function(e){
+			console.log(e.message.replace(dirnameRegExp, ''));
+			console.log(e.extract.join('\n'));
+			notifier.notify({
+				title : 'Error : ' + path.basename(e.fileName) + ' ' + e.line + ':' + e.column,
+				message : e.fileName.replace(dirnameRegExp, ''),
+				icon: 'node_modules/gulp-notify/assets/gulp-error.png'
+			}, function (err) {
+				console.log(err);
+			});
+			this.emit('end');
+		})
+	)
 	.pipe(sourcemaps.write())
 	.pipe(gulp.dest(less.dest.dir))
 	.pipe(notify( less.dest.filename + ' is compiled !'));
