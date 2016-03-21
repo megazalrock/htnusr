@@ -210,7 +210,7 @@ gulp.task('build', function (callback) {
 	);
 });
 
-gulp.task('watch', ['watchify'] , function () {
+gulp.task('watch', ['watchify', 'less'] , function () {
 	gulp.watch([less.src.dir + '*.less'], ['less']);
 });
 
