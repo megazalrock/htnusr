@@ -2,6 +2,7 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import React from 'react';
+import MainMenu from './MainMenu';
 import FeedItem from './FeedItem';
 import Users from '../Users';
 
@@ -12,14 +13,9 @@ export default class Feed extends React.Component{
 		super(props);
 		this.state = {
 			feed: [],
-			mode: strage.getItem('mode') || 'hotentry',
-			viewMode: strage.getItem('viewMode') ||'text',
-			isLoading: false
-		};
-		this.cache = {
-			expires: Date.now(),
-			hotentry: [],
-			new: []
+			mode: this.props.route.path === 'new' ? 'new' : 'hotentry',
+			viewMode: strage.getItem('viewMode') || 'text',
+			isLoading: true
 		};
 		this.handleGetHatebEndCount = 0;
 		this.hatebs = [];
@@ -29,36 +25,21 @@ export default class Feed extends React.Component{
 	}
 
 	_getRss(mode){
-		this.handleGetHatebEndCount = 0;
-		this.setState({
-			isLoading: true
-		});
-		if(this.cache.expires < (Date.now() - 1000 * 60 * 1) || !this.cache[mode].length){
-			$.ajax({
-				url: 'get_feed.php',
-				data:{
-					type: mode 
-				},
-				dataType: 'json',
-				cache: true,
-				ifModified: true
-			})
-			.then((res) =>{	
-				this.setState({
-					feed: res
-				});
-				this.cache.expires = Date.now();
-				this.cache[mode] = res;
-				this.setState({
-					isLoading: false
-				});
-			});
-		}else{
+		$.ajax({
+			url: 'get_feed.php',
+			data:{
+				type: mode 
+			},
+			dataType: 'json',
+			cache: true,
+			ifModified: true
+		})
+		.then((res) =>{	
 			this.setState({
-				feed: this.cache[mode],
+				feed: res,
 				isLoading: false
 			});
-		}
+		});
 	}
 
 	setViewMode(mode){
@@ -90,17 +71,7 @@ export default class Feed extends React.Component{
 		});
 		return(
 			<div className="app">
-				<div className="ui">
-					<div className="feedType btnBox">
-						<div className={'hotentry btn' + (this.state.mode === 'hotentry' ? ' selected' : '')} onClick={this.setFeedType.bind(this, 'hotentry')}>人気</div>
-						<div className={'new btn' + (this.state.mode === 'new' ? ' selected' : '')} onClick={this.setFeedType.bind(this, 'new')}>新着</div>
-					</div>
-					<div className="viewMode btnBox">
-						<div className={'title btn' + (this.state.viewMode === 'title' ? ' selected' : '')} onClick={this.setViewMode.bind(this, 'title')}>タイトルのみ</div>
-						<div className={'text btn' + (this.state.viewMode === 'text' ? ' selected' : '')} onClick={this.setViewMode.bind(this, 'text')}>簡易表示</div>
-						<div className={'image btn' + (this.state.viewMode === 'image' ? ' selected' : '')} onClick={this.setViewMode.bind(this, 'image')}>画像表示</div>
-					</div>
-				</div>
+				<MainMenu route={this.props.route} handleSetViewMode={this.setViewMode.bind(this)} viewMode={this.state.viewMode} />
 				<div className={'feedList' + (this.state.isLoading ? ' loading' : '')}>
 					<div className="loadingAnime"></div>
 					<div className={'feedListBox view-' + (this.state.viewMode)}>
