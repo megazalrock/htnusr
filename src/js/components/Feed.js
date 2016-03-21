@@ -1,10 +1,8 @@
 /* global ga */
 import $ from 'jquery';
-import _ from 'lodash';
 import React from 'react';
 import MainMenu from './MainMenu';
 import FeedItem from './FeedItem';
-import Users from '../Users';
 
 const strage = window.localStorage;
 
@@ -13,18 +11,28 @@ export default class Feed extends React.Component{
 		super(props);
 		this.state = {
 			feed: [],
-			mode: this.props.route.path === 'new' ? 'new' : 'hotentry',
+			mode: null,//this.props.route.mode,
 			viewMode: strage.getItem('viewMode') || 'text',
 			isLoading: true
 		};
 		this.handleGetHatebEndCount = 0;
 		this.hatebs = [];
+		//console.log(this.props.route.mode);
+		//console.log('FEEEEED');
 	}
+
+	componentWillReceiveProps(nextProp){
+		this._getRss(nextProp.route.mode);
+	}
+
 	componentDidMount(){
-		this._getRss(this.state.mode);
+		this._getRss(this.props.route.mode);
 	}
 
 	_getRss(mode){
+		this.setState({
+			isLoading: true
+		});
 		$.ajax({
 			url: 'get_feed.php',
 			data:{
@@ -71,7 +79,7 @@ export default class Feed extends React.Component{
 		});
 		return(
 			<div className="app">
-				<MainMenu route={this.props.route} handleSetViewMode={this.setViewMode.bind(this)} viewMode={this.state.viewMode} />
+				<MainMenu mode={this.props.route.mode} route={this.props.route} handleSetViewMode={this.setViewMode.bind(this)} viewMode={this.state.viewMode} />
 				<div className={'feedList' + (this.state.isLoading ? ' loading' : '')}>
 					<div className="loadingAnime"></div>
 					<div className={'feedListBox view-' + (this.state.viewMode)}>

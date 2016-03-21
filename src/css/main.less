@@ -64,7 +64,6 @@ h3{
 	color: @btnFontColor;
 	box-sizing: border-box;
 	border: 1px solid rgba(0, 0, 0, 0);
-
 	/*@keyframes btnSelect{
 		from{
 			box-shadow: @btnShadow;
@@ -87,6 +86,7 @@ h3{
 	}
 	&:hover{
 		border: @btnBorder;
+		text-decoration: none;
 	}
 }
 .ui{
@@ -368,8 +368,8 @@ h3{
 	margin-bottom: @baseMargin;
 	.siteMap{
 		display: flex;
-		flex-direction: row;
-		justify-content: space-between;
+		flex-direction: wrap;
+		justify-content: space-around;
 		li{
 			margin: 0;
 			padding: 0;

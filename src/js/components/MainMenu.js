@@ -1,8 +1,8 @@
 import React from 'react';
+import {Link} from 'react-router';
 export default class MainMenu extends React.Component{
 	constructor(props){
 		super(props);
-		this.mode = this.props.route.path === 'new' ? 'new' : 'hotentry';
 	}
 
 	dispatchSetViewMode(viewMode){
@@ -13,8 +13,8 @@ export default class MainMenu extends React.Component{
 		return (
 			<div className="ui">
 				<div className="feedType btnBox">
-					<a className={'hotentry btn' + (this.mode === 'hotentry' ? ' selected' : '')} href="/">人気</a>
-					<a className={'new btn' + (this.mode === 'new' ? ' selected' : '')} href="/new">新着</a>
+					<Link className={'hotentry btn' + (this.props.mode === 'hotentry' ? ' selected' : '')} to="/">人気</Link>
+					<Link className={'new btn' + (this.props.mode === 'new' ? ' selected' : '')} href="/new" to="/new">新着</Link>
 				</div>
 				<div className="viewMode btnBox">
 					<div className={'title btn' + (this.props.viewMode === 'title' ? ' selected' : '')} onClick={this.dispatchSetViewMode.bind(this, 'title')}>タイトルのみ</div>
