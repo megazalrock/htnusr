@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
-import Users from '../Users';
-import StorageCache from '../StorageCache';
+import Users from '../../Users';
+import StorageCache from '../../StorageCache';
 import FeedItemBookmarkComments from './FeedItemBookmarkComments.js';
 export default class FeedItem extends React.Component{
 	constructor(props){

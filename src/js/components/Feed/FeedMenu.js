@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router';
-export default class MainMenu extends React.Component{
+export default class FeedMenu extends React.Component{
 	constructor(props){
 		super(props);
 	}
