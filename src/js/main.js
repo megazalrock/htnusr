@@ -1,31 +1,39 @@
-import $ from 'jquery';
 import React from 'react';
-import ReactDom from 'react-dom';
-import Feed from './components/Feed';
+import {render} from 'react-dom';
+import {Router, Route, IndexRoute, browserHistory} from 'react-router';
+import Feed from './components/Feed/Feed';
+import About from './components/About';
+import ScoreViewer from './components/ScoreViewer/ScoreViewer';
+import Footer from './components/Footer';
 import StorageCache from './StorageCache';
 
-class BetterHotentry{
-	constructor(){
-		this.rssUrls = {
-			hotentry: 'http://feeds.feedburner.com/hatena/b/hotentry',//'http://b.hatena.ne.jp/hotentry?mode=rss',//http://feeds.feedburner.com/hatena/b/hotentry
-			new: 'http://b.hatena.ne.jp/entrylist?mode=rss'
-		};
+class App extends React.Component{
+	constructor(props){
+		super(props);
 		var storageCache = new StorageCache();
 		storageCache.sweepCache((key, value) => {
 			return value.expires < storageCache.getNow();
 		});
-		/*$(window).scroll((e) => {
-			console.log($(window).scrollTop());
-		});*/
 	}
 
-	init(){
-		ReactDom.render(
-			<Feed rssUrls={this.rssUrls} cacheExpires={this.cacheExpires}/>,
-			document.getElementById('container')
+	render(){
+		return(
+			<div>
+				{this.props.children}
+				<Footer />
+			</div>
 		);
 	}
 }
 
-var main = new BetterHotentry();
-main.init();
+render((
+	<Router history={browserHistory} onUpdate={() => window.scrollTo(0, 0)}>
+		<Route path="/" component={App}>
+			<IndexRoute component={Feed} mode="hotentry"></IndexRoute>
+			<Route path="about" component={About} />
+			<Route path="new" component={Feed} mode="new" />
+			<Route path="score" component={ScoreViewer} />
+		</Route>
+	</Router>),
+	document.getElementById('container')
+);

@@ -1,10 +1,9 @@
 @import 'reset';
-@baseMargin: 0.5rem;
-@hatenaColor: #008ede;
-@btnBorderColor: rgba(0, 0, 0, 0.5);
+@import 'scoreViewer';
+@import 'valiables.less';
 html, body{
 	font-size: 15px;
-	//height: 100%;
+	height: 100%;
 }
 html{
 	background: #E0E0E0;
@@ -38,6 +37,7 @@ h3{
 	background: #FFF;
 	min-height: 100%;
 	overflow: hidden;
+	box-sizing: border-box;
 }
 .btn{
 	@btnSelectedBgColor: @hatenaColor;
@@ -63,7 +63,6 @@ h3{
 	color: @btnFontColor;
 	box-sizing: border-box;
 	border: 1px solid rgba(0, 0, 0, 0);
-
 	/*@keyframes btnSelect{
 		from{
 			box-shadow: @btnShadow;
@@ -76,7 +75,7 @@ h3{
 			color: @btnSelectedFontColor;
 		}
 	}*/
-	&.selected{
+	&.selected
 		box-shadow: @btnSelectedShadow;
 		background: @btnSelectedBgColor;
 		color: @btnSelectedFontColor;
@@ -84,10 +83,29 @@ h3{
 		animation-fill-mode: forwards;*/
 		border: @btnBorder;
 	}
+	&:active,
+	&.active{
+		.selected;
+	}
 	&:hover{
 		border: @btnBorder;
+		text-decoration: none;
 	}
 }
+
+.bookmarkCount{
+	color: #ff2d2d;
+	font-weight: bold;
+	background: #fdd;
+	opacity:0.8;
+	.count{
+		font-size: 110%;
+	}
+	&:hover{
+		text-decoration: none;
+	}
+}
+
 .ui{
 	display: flex;
 	flex-flow:row wrap;
@@ -100,6 +118,8 @@ h3{
 	}
 }
 .feedList{
+	@feedListHeight: 300px;
+	min-height: 300px;
 	&.loading{
 		position: relative;
 		.loadingAnime{
@@ -116,7 +136,7 @@ h3{
 			@color: @hatenaColor;//rgba(127,127,127, 0.5);
 			animation: rotate 1s linear infinite;
 			animation-fill-mode: both;
-			top: 200px;
+			top: (@feedListHeight - @height) / 2;
 			left: 0;
 			right: 0;
 			margin: 0 auto;
@@ -153,7 +173,7 @@ h3{
 			}
 
 		}
-		.feedItem{
+		.feedListBox{
 			visibility: hidden;
 		}
 	}
@@ -208,18 +228,6 @@ h3{
 					line-height: @height;
 					height: @height;
 					padding: 2px 4px;
-				}
-				.bookmarkCount{
-					color: #ff2d2d;
-					font-weight: bold;
-					background: #fdd;
-					opacity:0.8;
-					.count{
-						font-size: 110%;
-					}
-					&:hover{
-						text-decoration: none;
-					}
 				}
 				.score{
 					color: #FFF;
@@ -361,9 +369,25 @@ h3{
 	}
 }
 .globalFooter{
+	font-size: 0.75rem;
 	text-align: center;
 	margin-bottom: @baseMargin;
+	.siteMap{
+		display: flex;
+		flex-direction: wrap;
+		justify-content: space-around;
+		li{
+			margin: 0;
+			padding: 0;
+			list-style: none;
+			display: block;
+			a{
+
+			}
+		}
+	}
 	small{
 		opacity: 0.8;
+		font-size: 100%;
 	}
 }
