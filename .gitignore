@@ -1,4 +1,3 @@
 config.ini
 cache/*
 htdocs/last_updated
-!.htaccess

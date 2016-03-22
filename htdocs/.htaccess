@@ -1,4 +1,5 @@
 #jsとcssをgzipで
+<ifModule mod_rewrite.c>
 RewriteEngine On
 RewriteCond %{HTTP:Accept-Encoding} gzip
 RewriteCond %{REQUEST_FILENAME} !\.gz$
@@ -6,6 +7,7 @@ RewriteCond %{REQUEST_FILENAME}\.gz -s
 RewriteCond %{REQUEST_FILENAME} \.js$ [OR]
 RewriteCond %{REQUEST_FILENAME} \.css$
 RewriteRule .+ %{REQUEST_URI}.gz
+</ifModule>
  
 <FilesMatch "\.js\.gz$">
     ForceType application/x-javascript
@@ -17,6 +19,7 @@ RewriteRule .+ %{REQUEST_URI}.gz
     AddEncoding x-gzip .gz
 </FilesMatch>
 
+#リクエストを全部index.htmlに
 <ifModule mod_rewrite.c>
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
