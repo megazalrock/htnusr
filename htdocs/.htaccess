@@ -1,3 +1,13 @@
+#リクエストを全部index.htmlに
+<ifModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !index
+RewriteCond %{REQUEST_URI} !.*\.(css|js|html|png)
+RewriteRule (.*) / [L]
+</ifModule>
+
 #jsとcssをgzipで
 <ifModule mod_rewrite.c>
 RewriteEngine On
@@ -18,13 +28,3 @@ RewriteRule .+ %{REQUEST_URI}.gz
     ForceType text/css
     AddEncoding x-gzip .gz
 </FilesMatch>
-
-#リクエストを全部index.htmlに
-<ifModule mod_rewrite.c>
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !index
-RewriteCond %{REQUEST_URI} !.*\.(css|js|html|png)
-RewriteRule (.*) index.html [L]
-</ifModule>
