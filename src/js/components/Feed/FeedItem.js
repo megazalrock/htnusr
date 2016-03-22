@@ -34,7 +34,7 @@ export default class FeedItem extends React.Component{
 						return this.users.getScore(data, this.props.mode);
 					})
 					.then((score) => {
-						this.setState({score: this._roundNum(score).toFixed(2)});
+						this.setState({score: score});
 						storageCache.saveItem(this.props.data.id, {
 							bookmarkCount: this.state.bookmarkCount,
 							score: score,
@@ -47,7 +47,7 @@ export default class FeedItem extends React.Component{
 			}else{
 				this.setState({
 					bookmarkCount: cache.bookmarkCount,
-					score: this._roundNum(cache.score).toFixed(2)
+					score: cache.score
 				});
 			}			
 		}
@@ -132,7 +132,7 @@ export default class FeedItem extends React.Component{
 		return(
 			<div className="feedItem">
 				<div className="footer">
-					<div style={scoreStyle} className="score">{this.state.score || 'loading'}</div>
+					<div style={scoreStyle} className="score">{this._roundNum(this.state.score).toFixed(2) || 'loading'}</div>
 					<a href={bookmarkUrl} target="_blank" className='bookmarkCount'><span className="count">{this.state.bookmarkCount}</span><span className="usersText">users</span></a>
 					<time className="date" dateTime={this.props.data.date}>{dateString}</time>
 					<div className="category">{this.props.data.category}</div>
