@@ -122,7 +122,7 @@ export default class FeedItem extends React.Component{
 			return _.template('${y}/${m}/${d} ${h}:${i}:${s}')({
 				y: date.getFullYear(),
 				m: (date.getMonth() + 1),
-				d: date.getDay(),
+				d: date.getDate(),
 				h: this._zeroPadding(date.getHours(), 2),
 				i: this._zeroPadding(date.getMinutes(), 2),
 				s: this._zeroPadding(date.getSeconds(), 2)
