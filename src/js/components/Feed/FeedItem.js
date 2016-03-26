@@ -22,7 +22,7 @@ export default class FeedItem extends React.Component{
 			var storageCache = new StorageCache();
 			var cache = storageCache.loadItem(this.props.data.id);
 			var now = storageCache.getNow();
-			if(true || !cache || cache.cacheExpires < now){
+			if(!cache || cache.cacheExpires < now){
 				this.users.getUsers(this.props.data.link)
 					.then((data) => {
 						this.setState({
