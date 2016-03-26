@@ -37,9 +37,10 @@ export default class FeedItem extends React.Component{
 						this.setState({score: score});
 						storageCache.saveItem(this.props.data.id, {
 							bookmarkCount: this.state.bookmarkCount,
-							score: score,
+							score: parseFloat(score) || 0,
 							expires:  now + lifeTime
 						});
+						this.props.handleOnAjaxEnd(this.props.data.id, this.state.bookmarkCount, score);
 					})
 					.fail((...args) => {
 						console.log(args);
@@ -49,6 +50,7 @@ export default class FeedItem extends React.Component{
 					bookmarkCount: cache.bookmarkCount,
 					score: cache.score
 				});
+				this.props.handleOnAjaxEnd(this.props.data.id, cache.bookmarkCount, cache.score);
 			}			
 		}
 	}
