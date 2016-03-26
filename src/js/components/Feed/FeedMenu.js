@@ -5,10 +5,6 @@ export default class FeedMenu extends React.Component{
 		super(props);
 	}
 
-	componentWillReceiveProps(nextProp){
-		console.log(nextProp);
-	}
-
 	dispatchSetViewMode(viewMode){
 		this.props.handleSetViewMode(viewMode);
 	}
@@ -18,7 +14,7 @@ export default class FeedMenu extends React.Component{
 	}
 
 	render(){
-		console.log(this.props);
+		console.log('isFeedItemLoading :' , this.props.isFeedItemLoading);
 		return (
 			<div className="ui">
 				<div className="feedType btnBox">

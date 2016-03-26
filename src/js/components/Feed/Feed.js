@@ -1,6 +1,7 @@
 /* global ga */
 import $ from 'jquery';
 import _ from 'lodash';
+import sha1 from 'sha1';
 import React from 'react';
 import FeedMenu from './FeedMenu';
 import FeedItem from './FeedItem';
@@ -49,6 +50,7 @@ export default class Feed extends React.Component{
 	}
 
 	componentWillReceiveProps(nextProp){
+		this.feedCache = [];
 		this._getRss(nextProp.route.mode);
 	}
 
@@ -87,7 +89,8 @@ export default class Feed extends React.Component{
 	}
 
 	setFeedType(mode){
-		if(mode !== this.state.mode){	
+		if(mode !== this.state.mode){
+			this.onAjaxLoadingStart();
 			this.setState({
 				mode: mode
 			});
@@ -98,14 +101,14 @@ export default class Feed extends React.Component{
 	}
 
 	itemAjaxEnd(id, bookmarkCount, score){
+		this.itemAjaxEndCount += 1;
 		var index = _.findIndex(this.state.feed, {id: id});
 		var feedItem = this.state.feed[index];
 		this.feedCache.push(_.defaultsDeep(feedItem, {
 			bookmarkCount: bookmarkCount,
 			score: score
 		}));
-		this.itemAjaxEndCount++;
-		if(this.itemAjaxEndCount === this.state.feed.length){
+		if(this.feedCache.length === this.state.feed.length){
 			this.itemAjaxEndCount = 0;
 			this.setSortedFeed(this.feedCache, this.state['orderby_' + this.props.route.mode], {
 				isFeedItemLoading: false
@@ -115,7 +118,6 @@ export default class Feed extends React.Component{
 	}
 
 	setSortedFeed(feed, orderby, setWith = {}){
-		//console.log(_.defaults({}, orderbyObj, this.state.orderby));
 		var result;
 		if(_.isEmpty(this.sortedFeeds[this.props.route.mode][orderby])){
 			if(orderby === 'default'){
@@ -166,15 +168,28 @@ export default class Feed extends React.Component{
 	}
 
 	render(){
-		console.log(this.state.isFeedItemLoading);
 		var feedList = this.state.feed.map((item, key)=>{
 			return (
-				<FeedItem handleOnAjaxEnd={this.itemAjaxEnd.bind(this)} handleOnAjaxLoadingStart={this.onAjaxLoadingStart.bind(this)} key={item.id + '-' + key} data={item} mode={this.state.mode} viewMode={this.state.viewMode} />
+				<FeedItem
+					handleOnAjaxEnd={this.itemAjaxEnd.bind(this)}
+					key={sha1(JSON.stringify(item) + key)}
+					data={item}
+					mode={this.state.mode}
+					viewMode={this.state.viewMode}
+				/>
 			);
 		});
 		return(
 			<div className="feed">
-				<FeedMenu isFeedItemLoading={this.state.isFeedItemLoading} orderby={this.state['orderby_' + this.props.route.mode]} handleOnChangeOrderby={this.onChangeOrderby.bind(this)} mode={this.props.route.mode} route={this.props.route} handleSetViewMode={this.setViewMode.bind(this)} viewMode={this.state.viewMode} />
+				<FeedMenu
+					handleOnChangeOrderby={this.onChangeOrderby.bind(this)}
+					handleSetViewMode={this.setViewMode.bind(this)}
+					isFeedItemLoading={this.state.isFeedItemLoading}
+					orderby={this.state['orderby_' + this.props.route.mode]}
+					mode={this.props.route.mode}
+					route={this.props.route}
+					viewMode={this.state.viewMode}
+				/>
 				<div className={'feedList' + (this.state.isLoading ? ' loading' : '')}>
 					<div className="loadingAnime"></div>
 					<div className={'feedListBox view-' + (this.state.viewMode)}>

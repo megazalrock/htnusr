@@ -7,8 +7,8 @@ export default class FeedItem extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {
-			bookmarkCount: null,
-			score: null
+			bookmarkCount: this.props.data.bookmarkCount || null,
+			score: this.props.data.score || null
 		};
 		this.users = new Users();
 	}
@@ -16,14 +16,12 @@ export default class FeedItem extends React.Component{
 	componentWillUnmount(){
 		this.users.abort();
 	}
-
 	componentDidMount(){
 		if(_.isNull(this.state.bookmarkCount) || _.isNull(this.state.score)){
 			var lifeTime = (this.props.mode === 'hotentry' ? 60 * 60 : 60 * 5);
 			var storageCache = new StorageCache();
 			var cache = storageCache.loadItem(this.props.data.id);
 			var now = storageCache.getNow();
-			this.props.handleOnAjaxLoadingStart();
 			if(true || !cache || cache.cacheExpires < now){
 				this.users.getUsers(this.props.data.link)
 					.then((data) => {
@@ -35,24 +33,30 @@ export default class FeedItem extends React.Component{
 						return this.users.getScore(data, this.props.mode);
 					})
 					.then((score) => {
+						score = parseFloat(score) || 0;
 						this.setState({score: score});
 						storageCache.saveItem(this.props.data.id, {
 							bookmarkCount: this.state.bookmarkCount,
-							score: parseFloat(score) || 0,
+							score: score,
 							expires:  now + lifeTime
 						});
 						this.props.handleOnAjaxEnd(this.props.data.id, this.state.bookmarkCount, score);
 					})
 					.fail((...args) => {
+						this.props.handleOnAjaxEnd(this.props.data.id, null, null);
 						console.log(args);
 					});
 			}else{
+				cache.bookmarkCount = parseInt(cache.bookmarkCount);
+				cache.score = parseFloat(cache.score);
 				this.setState({
 					bookmarkCount: cache.bookmarkCount,
 					score: cache.score
 				});
 				this.props.handleOnAjaxEnd(this.props.data.id, cache.bookmarkCount, cache.score);
 			}			
+		}else{
+			this.props.handleOnAjaxEnd(this.props.data.id, this.props.data.bookmarkCount, this.props.data.score);
 		}
 	}
 
