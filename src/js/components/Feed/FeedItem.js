@@ -7,8 +7,8 @@ export default class FeedItem extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {
-			bookmarkCount: null,
-			score: null
+			bookmarkCount: this.props.data.bookmarkCount || null,
+			score: this.props.data.score || null
 		};
 		this.users = new Users();
 	}
@@ -16,7 +16,6 @@ export default class FeedItem extends React.Component{
 	componentWillUnmount(){
 		this.users.abort();
 	}
-
 	componentDidMount(){
 		if(_.isNull(this.state.bookmarkCount) || _.isNull(this.state.score)){
 			var lifeTime = (this.props.mode === 'hotentry' ? 60 * 60 : 60 * 5);
@@ -34,22 +33,30 @@ export default class FeedItem extends React.Component{
 						return this.users.getScore(data, this.props.mode);
 					})
 					.then((score) => {
-						this.setState({score: this._roundNum(score).toFixed(2)});
+						score = parseFloat(score) || 0;
+						this.setState({score: score});
 						storageCache.saveItem(this.props.data.id, {
 							bookmarkCount: this.state.bookmarkCount,
 							score: score,
 							expires:  now + lifeTime
 						});
+						this.props.handleOnAjaxEnd(this.props.data.id, this.state.bookmarkCount, score);
 					})
 					.fail((...args) => {
+						this.props.handleOnAjaxEnd(this.props.data.id, null, null);
 						console.log(args);
 					});
 			}else{
+				cache.bookmarkCount = parseInt(cache.bookmarkCount);
+				cache.score = parseFloat(cache.score);
 				this.setState({
 					bookmarkCount: cache.bookmarkCount,
-					score: this._roundNum(cache.score).toFixed(2)
+					score: cache.score
 				});
+				this.props.handleOnAjaxEnd(this.props.data.id, cache.bookmarkCount, cache.score);
 			}			
+		}else{
+			this.props.handleOnAjaxEnd(this.props.data.id, this.props.data.bookmarkCount, this.props.data.score);
 		}
 	}
 
@@ -122,7 +129,7 @@ export default class FeedItem extends React.Component{
 			return _.template('${y}/${m}/${d} ${h}:${i}:${s}')({
 				y: date.getFullYear(),
 				m: (date.getMonth() + 1),
-				d: date.getDay(),
+				d: date.getDate(),
 				h: this._zeroPadding(date.getHours(), 2),
 				i: this._zeroPadding(date.getMinutes(), 2),
 				s: this._zeroPadding(date.getSeconds(), 2)
@@ -132,7 +139,7 @@ export default class FeedItem extends React.Component{
 		return(
 			<div className="feedItem">
 				<div className="footer">
-					<div style={scoreStyle} className="score">{this.state.score || 'loading'}</div>
+					<div style={scoreStyle} className="score">{this._roundNum(this.state.score).toFixed(2) || 'loading'}</div>
 					<a href={bookmarkUrl} target="_blank" className='bookmarkCount'><span className="count">{this.state.bookmarkCount}</span><span className="usersText">users</span></a>
 					<time className="date" dateTime={this.props.data.date}>{dateString}</time>
 					<div className="category">{this.props.data.category}</div>
