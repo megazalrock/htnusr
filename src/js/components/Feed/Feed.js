@@ -13,7 +13,7 @@ export default class Feed extends React.Component{
 		super(props);
 		this.state = {
 			feed: [],
-			mode: null,//this.props.route.mode,
+			mode: null,
 			viewMode: strage.getItem('viewMode') || 'text',
 			isLoading: true,
 			orderby_new: strage.getItem('orderby_new') || 'default',
