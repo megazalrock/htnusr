@@ -16,12 +16,11 @@ export default class Feed extends React.Component{
 			mode: null,//this.props.route.mode,
 			viewMode: strage.getItem('viewMode') || 'text',
 			isLoading: true,
-			orderby_new: 'default',
-			orderby_hotentry: 'default',
+			orderby_new: strage.getItem('orderby_new') || 'default',
+			orderby_hotentry: strage.getItem('orderby_hotentry') || 'default',
 			isFeedItemLoading: false
 		};
 		this.feedCache = [];
-		this.itemAjaxEndCount = 0;
 		this.sortedFeeds = {
 			'new': {
 				'default': [],
@@ -55,27 +54,36 @@ export default class Feed extends React.Component{
 	}
 
 	componentDidMount(){
+		this.onAjaxLoadingStart();
 		this._getRss(this.props.route.mode);
 	}
 
 	_getRss(mode){
-		this.setState({
-			isLoading: true
-		});
-		$.ajax({
-			url: 'get_feed.php',
-			data:{
-				type: mode 
-			},
-			dataType: 'json',
-			cache: true,
-			ifModified: true
-		})
-		.then((res) =>{	
-			this.setSortedFeed(res, this.state['orderby_' + this.props.route.mode], {
+		if(_.isEmpty(this.sortedFeeds[mode][this.state['orderby_' + mode]])){
+			this.setState({
+				isLoading: true
+			});
+			$.ajax({
+				url: 'get_feed.php',
+				data:{
+					type: mode 
+				},
+				dataType: 'json',
+				cache: true,
+				ifModified: true
+			})
+			.then((res) =>{
+				this.setState({
+					feed: res,
+					isLoading: false
+				});
+			});
+		}else{
+			this.setState({
+				feed: this.sortedFeeds[mode][this.state['orderby_' + mode]],
 				isLoading: false
 			});
-		});
+		}
 	}
 
 	setViewMode(mode){
@@ -101,7 +109,6 @@ export default class Feed extends React.Component{
 	}
 
 	itemAjaxEnd(id, bookmarkCount, score){
-		this.itemAjaxEndCount += 1;
 		var index = _.findIndex(this.state.feed, {id: id});
 		var feedItem = this.state.feed[index];
 		this.feedCache.push(_.defaultsDeep(feedItem, {
@@ -109,7 +116,6 @@ export default class Feed extends React.Component{
 			score: score
 		}));
 		if(this.feedCache.length === this.state.feed.length){
-			this.itemAjaxEndCount = 0;
 			this.setSortedFeed(this.feedCache, this.state['orderby_' + this.props.route.mode], {
 				isFeedItemLoading: false
 			});
@@ -155,6 +161,7 @@ export default class Feed extends React.Component{
 		newState['orderby_' + this.props.route.mode] = orderby;
 		newState = _.defaultsDeep(newState, setWith);
 		this.setState(newState);
+		strage.setItem('orderby_' + this.props.route.mode, orderby);
 	}
 
 	onChangeOrderby(orderby){

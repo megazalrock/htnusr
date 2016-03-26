@@ -42,7 +42,7 @@ h3{
 .btn{
 	@btnSelectedBgColor: @hatenaColor;
 	@btnSelectedFontColor: #FFF;
-	@btnBgColor: #EEE;
+	//@btnBgColor: #EEE;
 	@btnFontColor: #333;
 	@btnAnimeDuration: 200ms;
 	@btnSelectedShadow: inset 0px 0px 5px rgba(0, 0, 0, 0.5);
@@ -50,7 +50,7 @@ h3{
 
 	@btnShadowColor: rgba(0, 0, 0, 0.5);
 	@btnBorder: 1px solid @btnBorderColor;
-	@fontSize: .933333333rem;
+	@fontSize: @btnFontSize;
 	@height: @fontSize * 2;
 	font-size: @fontSize;
 	display: inline-block;
@@ -83,7 +83,7 @@ h3{
 		animation-fill-mode: forwards;*/
 		border: @btnBorder;
 	}
-	&:active,
+	/*&:active,*/
 	&.active{
 		.selected;
 	}
@@ -113,7 +113,14 @@ h3{
 	.btnBox{
    		flex: 0 0 auto;
   		margin-bottom: @baseMargin;
+		vertical-align: top;
 		&.viewMode{
+		}
+		.btn{
+			margin-right: 1px;
+		}
+		.orderby{
+			vertical-align: top;
 		}
 	}
 }

@@ -14,17 +14,16 @@ export default class FeedMenu extends React.Component{
 	}
 
 	render(){
-		console.log('isFeedItemLoading :' , this.props.isFeedItemLoading);
 		return (
 			<div className="ui">
 				<div className="feedType btnBox">
 					<Link className={'hotentry btn' + (this.props.mode === 'hotentry' ? ' selected' : '')} to="/">人気</Link>
 					<Link className={'new btn' + (this.props.mode === 'new' ? ' selected' : '')} href="/new" to="/new">新着</Link>
-					<select className={'orderby ' + this.props.isFeedItemLoading ? 'disabled' : ''} disabled={this.props.isFeedItemLoading ? 'disabled' : ''} value={this.props.orderby} name="orderby" onChange={this.dispatchOnChangeOrderby.bind(this)}>
-						<option value="default">はてな</option>
-						<option value="smart">スコア+日時</option>
-						<option value="score">スコア</option>
-						<option value="date">日時</option>
+					<select className={'orderby btn' + (this.props.isFeedItemLoading ? ' hidden' : '')} disabled={this.props.isFeedItemLoading ? 'disabled' : ''} value={this.props.orderby} name="orderby" onChange={this.dispatchOnChangeOrderby.bind(this)}>
+						<option value="default">{(this.props.isFeedItemLoading ? 'loading score...' : 'はてな')}</option>
+						<option value="smart">{(this.props.isFeedItemLoading ? 'loading score...' : 'スコア+日時')}</option>
+						<option value="score">{(this.props.isFeedItemLoading ? 'loading score...' : 'スコア')}</option>
+						<option value="date">{(this.props.isFeedItemLoading ? 'loading score...' : '日時')}</option>
 					</select>
 				</div>
 				<div className="viewMode btnBox">
