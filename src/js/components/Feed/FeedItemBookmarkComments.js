@@ -1,3 +1,4 @@
+/* global ga */
 import $ from 'jquery';
 import _ from 'lodash';
 import React from 'react';
@@ -33,6 +34,8 @@ export default class FeedItemBookmarkComments extends React.Component{
 		this.setState({
 			'isCommentsOpen' : this.isCommentsOpen
 		});
+
+		ga && ga('send', 'event', 'Feet Item', (this.isCommentsOpen ? 'Open' : 'Close') + ' Comment List', this.props.link);
 
 		var toggleCommentBox = () => {
 			var $window = this.$window = this.$window || $(window);

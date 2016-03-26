@@ -1,3 +1,4 @@
+/* globals ga */
 import React from 'react';
 import {render} from 'react-dom';
 import {Router, Route, IndexRoute, browserHistory} from 'react-router';
@@ -6,7 +7,7 @@ import About from './components/About';
 import ScoreViewer from './components/ScoreViewer/ScoreViewer';
 import Footer from './components/Footer';
 import StorageCache from './StorageCache';
-
+ga && ga('send', 'pageview');
 class App extends React.Component{
 	constructor(props){
 		super(props);
@@ -14,6 +15,18 @@ class App extends React.Component{
 		storageCache.sweepCache((key, value) => {
 			return value.expires < storageCache.getNow();
 		});
+	}
+
+	componentDidMount(){
+		this._sendGaPageview();
+	}
+
+	componentDidUpdate(){
+		this._sendGaPageview();
+	}
+
+	_sendGaPageview(){
+		ga && ga('send', 'pageview', this.props.location.pathname);
 	}
 
 	render(){
