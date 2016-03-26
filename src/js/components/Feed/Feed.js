@@ -16,7 +16,8 @@ export default class Feed extends React.Component{
 			viewMode: strage.getItem('viewMode') || 'text',
 			isLoading: true,
 			orderby_new: 'default',
-			orderby_hotentry: 'default'
+			orderby_hotentry: 'default',
+			isFeedItemLoading: false
 		};
 		this.feedCache = [];
 		this.itemAjaxEndCount = 0;
@@ -39,7 +40,12 @@ export default class Feed extends React.Component{
 	}
 
 	shouldComponentUpdate(nextProp, nextState){
-		return !_.isEqual(this.state.feed, nextState.feed) || this.props.route.mode !== nextProp.route.mode || this.state.isLoading !== nextState.isLoading;
+		return (
+			!_.isEqual(this.state.feed, nextState.feed) ||
+			this.props.route.mode !== nextProp.route.mode ||
+			this.state.isLoading !== nextState.isLoading ||
+			this.state.isFeedItemLoading !== nextState.isFeedItemLoading
+		);
 	}
 
 	componentWillReceiveProps(nextProp){
@@ -101,7 +107,9 @@ export default class Feed extends React.Component{
 		this.itemAjaxEndCount++;
 		if(this.itemAjaxEndCount === this.state.feed.length){
 			this.itemAjaxEndCount = 0;
-			this.setSortedFeed(this.feedCache, this.state['orderby_' + this.props.route.mode]);
+			this.setSortedFeed(this.feedCache, this.state['orderby_' + this.props.route.mode], {
+				isFeedItemLoading: false
+			});
 			this.feedCache = [];
 		}
 	}
@@ -116,11 +124,9 @@ export default class Feed extends React.Component{
 			}else if(orderby === 'score'){
 				//スコア降順
 				result = _.sortBy(feed, 'score').reverse();
-				//return _.sortBy(feed, 'score', 'desc');
 			}else if(orderby === 'date'){
 				//日時降順
 				result = _.sortBy(feed, 'date').reverse();
-				//return _.sortBy(feed, 'score', 'desc');
 			}else{
 				result = feed;
 			}
@@ -134,23 +140,28 @@ export default class Feed extends React.Component{
 		newState['orderby_' + this.props.route.mode] = orderby;
 		newState = _.defaultsDeep(newState, setWith);
 		this.setState(newState);
-		console.log('setSortedFeed END', newState);
-		console.log(this.state['orderby_' + this.props.route.mode]);
 	}
 
 	onChangeOrderby(orderby){
 		this.setSortedFeed(this.state.feed, orderby);
 	}
 
+	onAjaxLoadingStart(){
+		this.setState({
+			isFeedItemLoading: true
+		});
+	}
+
 	render(){
+		console.log(this.state.isFeedItemLoading);
 		var feedList = this.state.feed.map((item, key)=>{
 			return (
-				<FeedItem handleOnAjaxEnd={this.itemAjaxEnd.bind(this)} key={item.id + '-' + key} data={item} mode={this.state.mode} viewMode={this.state.viewMode} />
+				<FeedItem handleOnAjaxEnd={this.itemAjaxEnd.bind(this)} handleOnAjaxLoadingStart={this.onAjaxLoadingStart.bind(this)} key={item.id + '-' + key} data={item} mode={this.state.mode} viewMode={this.state.viewMode} />
 			);
 		});
 		return(
 			<div className="feed">
-				<FeedMenu orderby={this.state['orderby_' + this.props.route.mode]} handleOnChangeOrderby={this.onChangeOrderby.bind(this)} mode={this.props.route.mode} route={this.props.route} handleSetViewMode={this.setViewMode.bind(this)} viewMode={this.state.viewMode} />
+				<FeedMenu isFeedItemLoading={this.state.isFeedItemLoading} orderby={this.state['orderby_' + this.props.route.mode]} handleOnChangeOrderby={this.onChangeOrderby.bind(this)} mode={this.props.route.mode} route={this.props.route} handleSetViewMode={this.setViewMode.bind(this)} viewMode={this.state.viewMode} />
 				<div className={'feedList' + (this.state.isLoading ? ' loading' : '')}>
 					<div className="loadingAnime"></div>
 					<div className={'feedListBox view-' + (this.state.viewMode)}>

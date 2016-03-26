@@ -18,13 +18,13 @@ export default class FeedMenu extends React.Component{
 	}
 
 	render(){
-		console.log(this.props.orderby);
+		console.log(this.props);
 		return (
 			<div className="ui">
 				<div className="feedType btnBox">
 					<Link className={'hotentry btn' + (this.props.mode === 'hotentry' ? ' selected' : '')} to="/">人気</Link>
 					<Link className={'new btn' + (this.props.mode === 'new' ? ' selected' : '')} href="/new" to="/new">新着</Link>
-					<select value={this.props.orderby} name="orderby" onChange={this.dispatchOnChangeOrderby.bind(this)}>
+					<select className={'orderby ' + this.props.isFeedItemLoading ? 'disabled' : ''} disabled={this.props.isFeedItemLoading ? 'disabled' : ''} value={this.props.orderby} name="orderby" onChange={this.dispatchOnChangeOrderby.bind(this)}>
 						<option value="default">はてな</option>
 						<option value="smart">スコア+日時</option>
 						<option value="score">スコア</option>
