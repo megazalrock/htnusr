@@ -124,7 +124,7 @@ Class Feed extends DataBase{
 	}
 
 
-	public function get_feed_data($type, $encodeJson = true, $order = 'ASC', $limit = null){
+	public function get_feed_data($type, $encodeJson = true, $order = 'ASC'){
 		if($type === 'hotentry'){
 			$table_name = $this->feed_hot_table_name;
 		}else if($type === 'new'){
@@ -134,9 +134,6 @@ Class Feed extends DataBase{
 			$query = 'SELECT * FROM ' . $table_name . ' ORDER BY `index`';
 			if($order == 'DESC'){
 				$query = $query . ' ' . $order;
-			}
-			if(is_numeric($limit)){
-				$query = $query . ' LIMIT 0, ' . $limit;
 			}
 			$dbh = $this->connection();
 			$sth = $dbh->prepare($query);
@@ -159,8 +156,8 @@ Class Feed extends DataBase{
 		}
 	}
 
-	public function get_feed_json($type, $limit = 50){
-		return $this->get_feed_data($type, true, 'DESC', $limit);
+	public function get_feed_json($type){
+		return $this->get_feed_data($type, true, 'DESC');
 	}
 
 	private function update_index($type){
