@@ -23,13 +23,6 @@ h1{
 		font-weight: normal;
 	}
 }
-h2{
-	font-size: 1.5rem;
-}
-h3{
-	font-size: 1rem;
-	font-weight: bold;
-}
 .wrapper{
 	padding: @baseMargin @baseMargin * 2;
 	max-width: 800px;
@@ -396,5 +389,29 @@ h3{
 	small{
 		opacity: 0.8;
 		font-size: 100%;
+	}
+}
+
+.about{
+	@decorativeColor: #CCC;
+	h2{
+		font-size: 1.5rem;
+		//border-left: 1em solid #CCC;
+		line-height: 1;
+		//padding-left: 0.5em;
+		&::before{
+			content:"§";
+			display: inline;
+			color: @decorativeColor;
+			margin-right: 0.25em;
+		}
+	}
+	h3{
+		font-size: 1rem;
+		border-bottom: 1px solid @decorativeColor;
+	}
+	h4{
+		font-size: 1rem;
+		font-weight: bold;
 	}
 }

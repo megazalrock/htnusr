@@ -35,17 +35,6 @@ export default class Feed extends React.Component{
 				'date': []
 			}
 		};
-		//console.log(this.props.route.mode);
-		//console.log('FEEEEED');
-	}
-
-	shouldComponentUpdate(nextProp, nextState){
-		return (
-			!_.isEqual(this.state.feed, nextState.feed) ||
-			this.props.route.mode !== nextProp.route.mode ||
-			this.state.isLoading !== nextState.isLoading ||
-			this.state.isFeedItemLoading !== nextState.isFeedItemLoading
-		);
 	}
 
 	componentWillReceiveProps(nextProp){

@@ -119,7 +119,7 @@ export default class FeedItem extends React.Component{
 
 		var entryImage = (() => {
 			var entryImageSrc = this.props.data.html['entry-image'];
-			if(entryImageSrc){
+			if(entryImageSrc && this.props.viewMode === 'image'){
 				return (<img src={entryImageSrc} className="entryImage" alt=""/>);
 			}
 		})();
