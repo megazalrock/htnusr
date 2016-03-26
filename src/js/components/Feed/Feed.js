@@ -151,6 +151,7 @@ export default class Feed extends React.Component{
 		newState = _.defaultsDeep(newState, setWith);
 		this.setState(newState);
 		strage.setItem('orderby_' + this.props.route.mode, orderby);
+		ga && ga('send', 'event', 'Header UI', 'Sort Feed', orderby);
 	}
 
 	onChangeOrderby(orderby){
