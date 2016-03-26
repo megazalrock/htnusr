@@ -35,10 +35,8 @@ export default class Feed extends React.Component{
 				'date': []
 			}
 		};
-		//console.log(this.props.route.mode);
-		//console.log('FEEEEED');
 	}
-	
+
 	componentWillReceiveProps(nextProp){
 		this.feedCache = [];
 		this._getRss(nextProp.route.mode);

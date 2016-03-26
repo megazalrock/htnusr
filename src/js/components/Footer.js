@@ -12,7 +12,6 @@ export default class Fotter extends React.Component{
 					<li><Link to="/new" activeClassName="active">新着</Link></li>
 					<li><Link to="/about" activeClassName="active">このサイトについて</Link></li>
 					<li><Link to="/score" activeClassName="active">スコアだけ取得</Link></li>
-					{/*<li><a href="/star">スターランキング</a></li>*/}
 				</ul>
 				<small>
 					Developed by Otto Kamiya(<a href="https://twitter.com/megazal_rock" target="_blank">@megazal_rock</a>)
