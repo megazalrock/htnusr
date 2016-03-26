@@ -10,4 +10,4 @@ if(empty($type)){
 }
 $feed = new Feed();
 $cache = new Cache(FEED_CACHE_EXPIRES, true, FEED_CACHE_DIR);
-$cache->respond($type, 'application/json; charset=utf-8', array($feed, 'get_feed_json'), array($type));
+$cache->respond($type, 'application/json; charset=utf-8', array($feed, 'get_feed_json'), array($type, 50));
