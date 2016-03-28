@@ -2,11 +2,13 @@
 date_default_timezone_set('Asia/Tokyo');
 require_once (dirname(__FILE__) . '/Constant.php');
 require_once (dirname(__FILE__) . '/lib/DataBase.php');
+require_once (dirname(__FILE__) . '/Hatena.php');
 require_once (dirname(__FILE__) . '/lib/Cache.php');
+require_once (dirname(__FILE__) . '/Users.php');
 Class Feed extends DataBase{
 	const HOTENTRY_FEED_URL = 'http://feeds.feedburner.com/hatena/b/hotentry';
 	const NEW_FEED_URL = 'http://b.hatena.ne.jp/entrylist?mode=rss';
-	const FEED_MAX_NUM = 100;
+	const FEED_MAX_NUM = 10000;
 
 	private function fetch_feed($type){
 		if($type === 'hotentry'){
@@ -124,7 +126,7 @@ Class Feed extends DataBase{
 	}
 
 
-	public function get_feed_data($type, $encodeJson = true, $order = 'ASC'){
+	public function get_feed_data($type, $encodeJson = true, $order = 'ASC', $limit = null){
 		if($type === 'hotentry'){
 			$table_name = $this->feed_hot_table_name;
 		}else if($type === 'new'){
@@ -134,6 +136,9 @@ Class Feed extends DataBase{
 			$query = 'SELECT * FROM ' . $table_name . ' ORDER BY `index`';
 			if($order == 'DESC'){
 				$query = $query . ' ' . $order;
+			}
+			if(is_numeric($limit)){
+				$query = $query . ' LIMIT 0, ' . $limit;
 			}
 			$dbh = $this->connection();
 			$sth = $dbh->prepare($query);
@@ -156,8 +161,8 @@ Class Feed extends DataBase{
 		}
 	}
 
-	public function get_feed_json($type){
-		return $this->get_feed_data($type, true, 'DESC');
+	public function get_feed_json($type, $limit){
+		return $this->get_feed_data($type, true, 'DESC', $limit);
 	}
 
 	private function update_index($type){
@@ -196,8 +201,6 @@ Class Feed extends DataBase{
 		}catch(PDOException $e){
 			echo $e->getMessage();
 		}
-
-
 	}
 
 
@@ -215,6 +218,7 @@ Class Feed extends DataBase{
 				$sth = $dbh->prepare('DELETE FROM ' . $table_name . ' WHERE `index` < :index');
 				$sth->bindValue(':index', $over_num , PDO::PARAM_INT);
 				$sth->execute();
+				echo "Delete ${over_num} items";
 			}catch(PDOException $e){
 				echo $e->getMessage();
 			}
@@ -222,11 +226,60 @@ Class Feed extends DataBase{
 		}
 	}
 
+	public function update_feed_score($type, $limit = 100){
+		if($type === 'hotentry'){
+			$table_name = $this->feed_hot_table_name;
+		}else if($type === 'new'){
+			$table_name = $this->feed_new_table_name;
+		}
+		
+		$limit_time = time() - 60 * 60 * 24;
+		$query = 'SELECT * FROM ' . $table_name . ' WHERE date > :date OR (score IS NULL OR bookmarkCount IS NULL) ORDER BY date DESC LIMIT 0, ' . $limit;
+		$dbh = $this->connection();
+		$sth = $dbh->prepare($query);
+		$sth->bindValue(':date', $limit_time , PDO::PARAM_INT);
+		$sth->execute();
+		$result = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+		$users = new Users();
+		$count = count($result);
+		foreach ($result as $index => $feed_item) {
+			$bookmark_info = HatenaAPI::fetch_bookmark_info($feed_item['link']);
+			if(!is_null($bookmark_info)){
+				echo ($index + 1) ." / ${count} " . $bookmark_info['title'] . "\n";
+				if(isset($bookmark_info['bookmarks'])){
+					$user_list = [];
+					foreach ($bookmark_info['bookmarks'] as $bookmark) {
+						$user_list[] = $bookmark['user'];
+					}
+					$score = $users->get_karma_sum($user_list, 0, $bookmark_info['count']);
+				}else{
+					$score = 0;
+				}
+				if(!is_null($score)){
+					$query = 'UPDATE ' . $table_name . ' SET score=:score, bookmarkCount=:bookmarkCount WHERE id=:id';
+					$sth = $dbh->prepare($query);
+					$sth->bindParam(':score', $score , PDO::PARAM_STR);
+					$sth->bindParam(':id', $feed_item['id'] , PDO::PARAM_STR);
+					$sth->bindParam(':bookmarkCount', $bookmark_info['count'], PDO::PARAM_INT);
+					$sth->execute();
+				}
+			}
+			usleep(0.5 * 1000000);
+		}
+	}
+
 	public function update_feed(){
+		echo 'Start fetch feed' . "\n";
 		$this->save_feed($this->parse_feed_data('hotentry'), 'hotentry');
 		$this->save_feed($this->parse_feed_data('new'), 'new');
+		echo 'Start delete old Feed' . "\n";
 		$this->delete_old_feed('hotentry');
 		$this->delete_old_feed('new');
+		echo 'Update hotentry feed score' . "\n";
+		$this->update_feed_score('hotentry', FEED_NUM);
+		echo 'Update new feed score' . "\n";
+		$this->update_feed_score('new', FEED_NUM);
 		echo 'Done !!';
 	}
 }

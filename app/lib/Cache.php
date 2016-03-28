@@ -93,36 +93,25 @@ class Cache {
 
 	public function save_cache($name, $str, $force_gzip = false){
 		$this->make_cache_dir();
+		$tmp_dir = sys_get_temp_dir();
 		if($force_gzip){
 			$cache_file_path = $this->get_cache_file_path($name, true);
+			$tmp_file_path = $tmp_dir . $name . 'gz';
 		}else{
 			$cache_file_path = $this->get_cache_file_path($name);
+			$tmp_file_path = $tmp_dir . $name;
 		}
 		if($force_gzip || $this->is_gzip_enabled){
-			$gzip = gzopen( $cache_file_path , 'w9' ) ;
+			$gzip = gzopen( $tmp_file_path , 'w9' ) ;
 			gzwrite( $gzip , $str ) ;
 			gzclose( $gzip ) ;
 		}else{
-			$handle = fopen($cache_file_path, 'w');
+			$handle = fopen($tmp_file_path, 'w');
 			fwrite($handle, $str);
 			fclose($handle);
 		}
-	}
 
-	public function sweap_old_cache($force = false){
-		if(!file_exists($this->cache_dir)){
-			return false;
-		}
-		$files = scandir($this->cache_dir);
-		foreach ($files as $file_name) {
-			$file_path = $this->cache_dir . '/' . $file_name;
-			if(!is_file($file_path)){
-				continue;
-			}
-			$file_time = filemtime($file_path);
-			if($force || $file_time < (time() - $this->cache_expires)){
-				unlink($file_path);
-			}
-		}
+		unlink($cache_file_path);
+		rename($tmp_file_path, $cache_file_path);
 	}
 }

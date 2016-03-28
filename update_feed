@@ -8,7 +8,6 @@ $feed->update_feed();
 $cache = new Cache(FEED_CACHE_EXPIRES, true, FEED_CACHE_DIR);
 $hotentry = $feed->get_feed_json('hotentry');
 $new = $feed->get_feed_json('new');
-$cache->sweap_old_cache(true);
 $cache->save_cache('hotentry', $hotentry);
 $cache->save_cache('hotentry', $hotentry, true);
 $cache->save_cache('new', $new);
