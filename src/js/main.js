@@ -12,9 +12,7 @@ class App extends React.Component{
 	constructor(props){
 		super(props);
 		var storageCache = new StorageCache();
-		storageCache.sweepCache((key, value) => {
-			return value.expires < storageCache.getNow();
-		});
+		storageCache.sweepCache();
 	}
 
 	componentDidMount(){
