@@ -61,7 +61,7 @@ export default class Feed extends React.Component{
 			})
 			.then((res) =>{
 				this.setState({
-					feed: res,
+					feed: this.sortFeeds(res, this.state['orderby_' + mode]),
 					isLoading: false
 				});
 			});
@@ -108,7 +108,7 @@ export default class Feed extends React.Component{
 		}
 	}
 
-	setSortedFeed(feed, orderby, setWith = {}){
+	sortFeeds(feed, orderby){
 		var result;
 		if(_.isEmpty(this.sortedFeeds[this.props.route.mode][orderby])){
 			if(orderby === 'default'){
@@ -116,16 +116,22 @@ export default class Feed extends React.Component{
 				result = _.sortBy(feed, 'index').reverse();
 			}else if(orderby === 'score'){
 				//スコア降順
-				result = _.sortBy(feed, 'score').reverse();
+				result = _.sortBy(feed, (feedItem) => {
+					return !_.isNull(feedItem.score) ? feedItem.score : -Infinity;
+				}).reverse();
 			}else if(orderby === 'date'){
 				//日時降順
 				result = _.sortBy(feed, 'date').reverse();
 			}else if(orderby === 'score-bookmark'){
 				//スコアブクマ比
 				result = _.sortBy(feed, (feedItem) => {
-					let bookmarkCount = feedItem.bookmarkCount || 0;
-					let score = feedItem.score || 1;
-					return (score / bookmarkCount);
+					if(feedItem.bookmarkCount){
+						let bookmarkCount = feedItem.bookmarkCount || 0;
+						let score = feedItem.score || 1;
+						return (score / bookmarkCount);
+					}else{
+						return -Infinity;
+					}
 				}).reverse();
 			}else if(orderby === 'smart'){
 				//Redditライク
@@ -153,6 +159,11 @@ export default class Feed extends React.Component{
 		}else{
 			result = this.sortedFeeds[this.props.route.mode][orderby];
 		}
+		return result;
+	}
+
+	setSortedFeed(feed, orderby, setWith = {}){
+		var result = this.sortFeeds(feed, orderby);
 		this.sortedFeeds[this.props.route.mode][orderby] = result;
 		var newState = {
 			feed: result

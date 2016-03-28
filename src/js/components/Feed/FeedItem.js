@@ -90,8 +90,19 @@ export default class FeedItem extends React.Component{
 				s: this._zeroPadding(date.getSeconds(), 2)
 			});
 		})();
+		var scoreString = (() => {
+			if(_.isNull(this.props.data.score)){
+				return (
+					<div style={scoreStyle} className="score">no data</div>
+				);
+			}else{
+				return (
+					<div style={scoreStyle} className="score">{this._roundNum(this.props.data.score).toFixed(2)}</div>
+				);
+			}
+		})();
 
-		var bookmarkCount = (() => {
+		var bookmarkCountString = (() => {
 			if(_.isNull(this.props.data.bookmarkCount)){
 				return (
 					<a href={bookmarkUrl} target="_blank" className='bookmarkCount'><span className="usersText">no data</span></a>
@@ -106,8 +117,8 @@ export default class FeedItem extends React.Component{
 		return(
 			<div className="feedItem">
 				<div className="footer">
-					<div style={scoreStyle} className="score">{this._roundNum(this.props.data.score).toFixed(2)}</div>
-					{bookmarkCount}
+					{scoreString}
+					{bookmarkCountString}
 					<time className="date" dateTime={this.props.data.date}>{dateString}</time>
 					<div className="category">{this.props.data.category}</div>
 				</div>
