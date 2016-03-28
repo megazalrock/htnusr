@@ -14,7 +14,7 @@ class HatenaAPI{
 	 * @param  string $json json文字列
 	 * @return array
 	 */
-	private function parse_hateb_user_star($json){
+	private static function parse_hateb_user_star($json){
 		$json = json_decode($json, true);
 		if(!isset($json['count']['purple'])){
 			$json['count']['purple'] = 0;
@@ -46,7 +46,7 @@ class HatenaAPI{
 	 * @param  string $userid ユーザーのID
 	 * @return int
 	 */
-	private function parse_hateb_user_follower($html, $userid){
+	private static function parse_hateb_user_follower($html, $userid){
 		$dom = new DOMDocument();
 		@$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
 		$xpath = new DOMXPath($dom);
@@ -64,7 +64,7 @@ class HatenaAPI{
 	 * @param  array $user_list ユーザーの配列
 	 * @return array
 	 */
-	public function fetch_hateb_users_info($user_list){
+	public static function fetch_hateb_users_info($user_list){
 		$mh = curl_multi_init();
 		$connection = array();
 		foreach ($user_list as $key => $user) {
@@ -134,4 +134,15 @@ class HatenaAPI{
 
 		return $result;
 	}
+
+	public function fetch_bookmark_info($url){
+		$curl = new CurlWrapper();
+		$result = json_decode( $curl->fetch(sprintf(self::HATEB_API, rawurlencode($url))), true );
+		if($curl->is_ok()){
+			return $result;
+		}else{
+			return null;
+		}
+	}
+
 }

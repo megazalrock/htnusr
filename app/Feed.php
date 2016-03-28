@@ -2,11 +2,13 @@
 date_default_timezone_set('Asia/Tokyo');
 require_once (dirname(__FILE__) . '/Constant.php');
 require_once (dirname(__FILE__) . '/lib/DataBase.php');
+require_once (dirname(__FILE__) . '/Hatena.php');
 require_once (dirname(__FILE__) . '/lib/Cache.php');
+require_once (dirname(__FILE__) . '/Users.php');
 Class Feed extends DataBase{
 	const HOTENTRY_FEED_URL = 'http://feeds.feedburner.com/hatena/b/hotentry';
 	const NEW_FEED_URL = 'http://b.hatena.ne.jp/entrylist?mode=rss';
-	const FEED_MAX_NUM = 100000;
+	const FEED_MAX_NUM = 10000;
 
 	private function fetch_feed($type){
 		if($type === 'hotentry'){
@@ -199,8 +201,6 @@ Class Feed extends DataBase{
 		}catch(PDOException $e){
 			echo $e->getMessage();
 		}
-
-
 	}
 
 
@@ -225,11 +225,55 @@ Class Feed extends DataBase{
 		}
 	}
 
+	public function update_feed_score($type){
+		if($type === 'hotentry'){
+			$table_name = $this->feed_hot_table_name;
+		}else if($type === 'new'){
+			$table_name = $this->feed_new_table_name;
+		}
+		
+		$query = 'SELECT * FROM ' . $table_name . ' WHERE date > :date OR score IS NULL ORDER BY date DESC LIMIT 0, 100';
+		$dbh = $this->connection();
+		$sth = $dbh->prepare($query);
+		$sth->bindValue(':date', $limit_time , PDO::PARAM_INT);
+		$sth->execute();
+		$result = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+		$users = new Users();
+		foreach ($result as $feed_item) {
+			$bookmark_info = HatenaAPI::fetch_bookmark_info($feed_item['link']);
+			if(!is_null($bookmark_info)){
+				if(isset($bookmark_info['bookmarks'])){
+					$user_list = [];
+					foreach ($bookmark_info['bookmarks'] as $bookmark) {
+						$user_list[] = $bookmark['user'];
+					}
+					$score = $users->get_karma_sum($user_list, 0, $bookmark_info['count']);
+				}else{
+					$score = 0;
+				}
+				if(!is_null($score)){
+					$query = 'UPDATE ' . $table_name . ' SET score=:score WHERE id=:id';
+					$sth = $dbh->prepare($query);
+					$sth->bindParam(':score', $score , PDO::PARAM_STR);
+					$sth->bindParam(':id', $feed_item['id'] , PDO::PARAM_INT);
+					$sth->execute();
+				}
+			}
+			sleep(1);
+		}
+	}
+
 	public function update_feed(){
+		echo 'Start fetch feed' . "\n";
 		$this->save_feed($this->parse_feed_data('hotentry'), 'hotentry');
 		$this->save_feed($this->parse_feed_data('new'), 'new');
+		echo 'Start delete old Feed' . "\n";
 		$this->delete_old_feed('hotentry');
 		$this->delete_old_feed('new');
+		echo 'Update feed score' . "\n";
+		$this->update_feed_score('hotentry');
+		$this->update_feed_score('new');
 		echo 'Done !!';
 	}
 }

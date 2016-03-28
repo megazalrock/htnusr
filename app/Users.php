@@ -287,7 +287,7 @@ class Users extends DataBase{
 	 * @param  int $read_later_num 「後で読む」の数
 	 * @return int
 	 */
-	public function get_karma_sum($users, $read_later_num, $bookmark_count, $type){
+	public function get_karma_sum($users, $read_later_num, $bookmark_count){
 		if(!is_array($users) && is_string($users)){
 			$users = array($users);
 		}
