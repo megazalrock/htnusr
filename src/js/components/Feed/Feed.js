@@ -123,14 +123,21 @@ export default class Feed extends React.Component{
 			}else if(orderby === 'smart'){
 				//Redditライク
 				result = _.sortBy(feed, (feedItem) => {
-					let bookmarkCount = feedItem.bookmarkCount || 0;
-					let score = feedItem.score;
-					let bsretio = score / bookmarkCount;
-					let seconds = feedItem.date;
-					let order = Math.log10(Math.max(Math.abs(score), 1)) + bsretio;
-					let sign = score < 0 ? -1 : score > 0 ? 1 : 0;
-					let num = sign * order + (seconds / (60 * 60 * 12));
-					return num;
+					if(feedItem.bookmarkCount){
+						let bookmarkCount = feedItem.bookmarkCount || 0;
+						let score = feedItem.score;
+						let bsretio = score / bookmarkCount;
+						let seconds = feedItem.date;
+						let order = Math.log10(Math.max(Math.abs(score), 1)) + bsretio;
+						let sign = score < 0 ? -1 : score > 0 ? 1 : 0;
+						if(sign < 0){
+							sign = sign * 10;
+						}
+						let num = sign * order + (seconds / (60 * 60 * 12));
+						return num;
+					}else{
+						return -Infinity;
+					}
 				}).reverse();
 
 			}else{
