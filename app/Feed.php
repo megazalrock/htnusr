@@ -218,6 +218,7 @@ Class Feed extends DataBase{
 				$sth = $dbh->prepare('DELETE FROM ' . $table_name . ' WHERE `index` < :index');
 				$sth->bindValue(':index', $over_num , PDO::PARAM_INT);
 				$sth->execute();
+				echo "Delete ${over_num} items";
 			}catch(PDOException $e){
 				echo $e->getMessage();
 			}
@@ -225,14 +226,15 @@ Class Feed extends DataBase{
 		}
 	}
 
-	public function update_feed_score($type){
+	public function update_feed_score($type, $limit = 100){
 		if($type === 'hotentry'){
 			$table_name = $this->feed_hot_table_name;
 		}else if($type === 'new'){
 			$table_name = $this->feed_new_table_name;
 		}
 		
-		$query = 'SELECT * FROM ' . $table_name . ' WHERE date > :date OR score IS NULL ORDER BY date DESC LIMIT 0, 100';
+		$limit_time = time() - 60 * 60 * 12;
+		$query = 'SELECT * FROM ' . $table_name . ' WHERE date > :date OR (score IS NULL OR bookmarkCount IS NULL) ORDER BY date DESC LIMIT 0, ' . $limit;
 		$dbh = $this->connection();
 		$sth = $dbh->prepare($query);
 		$sth->bindValue(':date', $limit_time , PDO::PARAM_INT);
@@ -240,9 +242,11 @@ Class Feed extends DataBase{
 		$result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
 		$users = new Users();
-		foreach ($result as $feed_item) {
+		$count = count($result);
+		foreach ($result as $index => $feed_item) {
 			$bookmark_info = HatenaAPI::fetch_bookmark_info($feed_item['link']);
 			if(!is_null($bookmark_info)){
+				echo ($index + 1) ." / ${count} " . $bookmark_info['title'] . "\n";
 				if(isset($bookmark_info['bookmarks'])){
 					$user_list = [];
 					foreach ($bookmark_info['bookmarks'] as $bookmark) {
@@ -253,14 +257,15 @@ Class Feed extends DataBase{
 					$score = 0;
 				}
 				if(!is_null($score)){
-					$query = 'UPDATE ' . $table_name . ' SET score=:score WHERE id=:id';
+					$query = 'UPDATE ' . $table_name . ' SET score=:score, bookmarkCount=:bookmarkCount WHERE id=:id';
 					$sth = $dbh->prepare($query);
 					$sth->bindParam(':score', $score , PDO::PARAM_STR);
-					$sth->bindParam(':id', $feed_item['id'] , PDO::PARAM_INT);
+					$sth->bindParam(':id', $feed_item['id'] , PDO::PARAM_STR);
+					$sth->bindParam(':bookmarkCount', $bookmark_info['count'], PDO::PARAM_INT);
 					$sth->execute();
 				}
 			}
-			sleep(1);
+			usleep(0.5 * 1000000);
 		}
 	}
 
@@ -271,9 +276,10 @@ Class Feed extends DataBase{
 		echo 'Start delete old Feed' . "\n";
 		$this->delete_old_feed('hotentry');
 		$this->delete_old_feed('new');
-		echo 'Update feed score' . "\n";
+		echo 'Update hotentry feed score' . "\n";
 		$this->update_feed_score('hotentry');
-		$this->update_feed_score('new');
+		echo 'Update new feed score' . "\n";
+		$this->update_feed_score('new', FEED_NUM);
 		echo 'Done !!';
 	}
 }
