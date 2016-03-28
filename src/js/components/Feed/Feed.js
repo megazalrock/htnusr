@@ -180,11 +180,11 @@ export default class Feed extends React.Component{
 	}
 
 	render(){
-		var feedList = this.state.feed.map((item, key)=>{
+		var feedList = this.state.feed.map((item)=>{
 			return (
 				<FeedItem
 					handleOnAjaxEnd={this.itemAjaxEnd.bind(this)}
-					key={sha1(JSON.stringify(item) + key)}
+					key={item.id}
 					data={item}
 					mode={this.state.mode}
 					viewMode={this.state.viewMode}

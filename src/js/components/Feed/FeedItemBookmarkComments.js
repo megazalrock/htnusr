@@ -3,6 +3,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import React from 'react';
 import ReactDom from 'react-dom';
+import Users from '../../Users';
 
 export default class FeedItemBookmarkComments extends React.Component{
 	constructor(props){
@@ -115,7 +116,8 @@ export default class FeedItemBookmarkComments extends React.Component{
 			this.setState({
 				bookmarkCommentsBtnText: this.bookmarkCommentsBtnTexts['loading']
 			});
-			this.props.users.getUsers(this.props.link)
+			let uses = new Users();
+			uses.getUsers(this.props.link)
 				.then((data) => {
 					this.setState({
 						bookmarkComments: data.data.bookmarks,

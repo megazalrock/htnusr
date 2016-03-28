@@ -1,18 +1,9 @@
 import _ from 'lodash';
 import React from 'react';
-import Users from '../../Users';
 import FeedItemBookmarkComments from './FeedItemBookmarkComments.js';
 export default class FeedItem extends React.Component{
 	constructor(props){
 		super(props);
-		this.users = new Users();
-	}
-	
-	componentWillUnmount(){
-		this.users.abort();
-	}
-	componentDidMount(){
-		
 	}
 
 	_roundNum(num, dig = 2){
