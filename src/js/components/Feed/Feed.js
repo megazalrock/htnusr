@@ -1,7 +1,6 @@
 /* global ga */
 import $ from 'jquery';
 import _ from 'lodash';
-import sha1 from 'sha1';
 import React from 'react';
 import FeedMenu from './FeedMenu';
 import FeedItem from './FeedItem';
