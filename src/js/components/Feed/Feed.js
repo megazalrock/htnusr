@@ -17,8 +17,7 @@ export default class Feed extends React.Component{
 			viewMode: strage.getItem('viewMode') || 'text',
 			isLoading: true,
 			orderby_new: strage.getItem('orderby_new') || 'default',
-			orderby_hotentry: strage.getItem('orderby_hotentry') || 'default',
-			isFeedItemLoading: false
+			orderby_hotentry: strage.getItem('orderby_hotentry') || 'default'
 		};
 		this.feedCache = [];
 		this.sortedFeeds = {
@@ -43,7 +42,6 @@ export default class Feed extends React.Component{
 	}
 
 	componentDidMount(){
-		this.onAjaxLoadingStart();
 		this._getRss(this.props.route.mode);
 	}
 
@@ -105,9 +103,7 @@ export default class Feed extends React.Component{
 			score: score
 		}));
 		if(this.feedCache.length === this.state.feed.length){
-			this.setSortedFeed(this.feedCache, this.state['orderby_' + this.props.route.mode], {
-				isFeedItemLoading: false
-			});
+			this.setSortedFeed(this.feedCache, this.state['orderby_' + this.props.route.mode]);
 			this.feedCache = [];
 		}
 	}
@@ -158,12 +154,6 @@ export default class Feed extends React.Component{
 		this.setSortedFeed(this.state.feed, orderby);
 	}
 
-	onAjaxLoadingStart(){
-		this.setState({
-			isFeedItemLoading: true
-		});
-	}
-
 	render(){
 		var feedList = this.state.feed.map((item, key)=>{
 			return (
@@ -181,7 +171,6 @@ export default class Feed extends React.Component{
 				<FeedMenu
 					handleOnChangeOrderby={this.onChangeOrderby.bind(this)}
 					handleSetViewMode={this.setViewMode.bind(this)}
-					isFeedItemLoading={this.state.isFeedItemLoading}
 					orderby={this.state['orderby_' + this.props.route.mode]}
 					mode={this.props.route.mode}
 					route={this.props.route}

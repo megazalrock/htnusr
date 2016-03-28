@@ -1,15 +1,10 @@
 import _ from 'lodash';
 import React from 'react';
 import Users from '../../Users';
-import StorageCache from '../../StorageCache';
 import FeedItemBookmarkComments from './FeedItemBookmarkComments.js';
 export default class FeedItem extends React.Component{
 	constructor(props){
 		super(props);
-		this.state = {
-			bookmarkCount: this.props.data.bookmarkCount || null,
-			score: this.props.data.score || null
-		};
 		this.users = new Users();
 	}
 	
@@ -17,47 +12,7 @@ export default class FeedItem extends React.Component{
 		this.users.abort();
 	}
 	componentDidMount(){
-		if(_.isNull(this.state.bookmarkCount) || _.isNull(this.state.score)){
-			var lifeTime = (this.props.mode === 'hotentry' ? 60 * 60 : 60 * 5);
-			var storageCache = new StorageCache();
-			var cache = storageCache.loadItem(this.props.data.id);
-			var now = storageCache.getNow();
-			if(!cache || cache.cacheExpires < now){
-				this.users.getUsers(this.props.data.link)
-					.then((data) => {
-						this.setState({
-							bookmarkCount: data.bookmarkCount,
-							bookmarkComments: data.data.bookmarks,
-							eid: data.data.eid
-						});
-						return this.users.getScore(data, this.props.mode);
-					})
-					.then((score) => {
-						score = parseFloat(score) || 0;
-						this.setState({score: score});
-						storageCache.saveItem(this.props.data.id, {
-							bookmarkCount: this.state.bookmarkCount,
-							score: score,
-							expires:  now + lifeTime
-						});
-						this.props.handleOnAjaxEnd(this.props.data.id, this.state.bookmarkCount, score);
-					})
-					.fail((...args) => {
-						this.props.handleOnAjaxEnd(this.props.data.id, null, null);
-						console.log(args);
-					});
-			}else{
-				cache.bookmarkCount = parseInt(cache.bookmarkCount);
-				cache.score = parseFloat(cache.score);
-				this.setState({
-					bookmarkCount: cache.bookmarkCount,
-					score: cache.score
-				});
-				this.props.handleOnAjaxEnd(this.props.data.id, cache.bookmarkCount, cache.score);
-			}			
-		}else{
-			this.props.handleOnAjaxEnd(this.props.data.id, this.props.data.bookmarkCount, this.props.data.score);
-		}
+		
 	}
 
 	_roundNum(num, dig = 2){
@@ -71,7 +26,7 @@ export default class FeedItem extends React.Component{
 	render(){
 		var bookmarkUrl = 'http://b.hatena.ne.jp/entry/' + (this.props.data.link.match(/^https/) ? 's/' : '') + this.props.data.link.replace(/^https?:\/\//, '');
 		var scoreColor;
-		var scoreSaturation = Math.abs(this.state.score);
+		var scoreSaturation = Math.abs(this.props.data.score);
 		var s = 0;
 		if(100 < scoreSaturation){
 			scoreSaturation = 100;
@@ -91,7 +46,7 @@ export default class FeedItem extends React.Component{
 			return c*t*t*t + b;
 		};
 
-		if(this.state.score < 0){ //minus
+		if(this.props.data.score < 0){ //minus
 			s = cubeIn(scoreSaturation, 0, 0.5, 10);
 			s *= 100;
 			s = this._roundNum(s, 0);
@@ -99,7 +54,7 @@ export default class FeedItem extends React.Component{
 				s = 50;
 			}
 			scoreColor = 'hsl(0, ' + s + '%, 50%)';
-		}else if(0 < this.state.score){ //plus
+		}else if(0 < this.props.data.score){ //plus
 			s = linear(scoreSaturation, 0, 0.4, 100);
 			s *= 100;
 			s = this._roundNum(s, 0);
@@ -136,11 +91,23 @@ export default class FeedItem extends React.Component{
 			});
 		})();
 
+		var bookmarkCount = (() => {
+			if(_.isNull(this.props.data.bookmarkCount)){
+				return (
+					<a href={bookmarkUrl} target="_blank" className='bookmarkCount'><span className="usersText">no data</span></a>
+				);
+			}else{
+				return (
+					<a href={bookmarkUrl} target="_blank" className='bookmarkCount'><span className="count">{this.props.data.bookmarkCount}</span><span className="usersText">users</span></a>
+				);
+			}
+		})();
+
 		return(
 			<div className="feedItem">
 				<div className="footer">
-					<div style={scoreStyle} className="score">{this._roundNum(this.state.score).toFixed(2) || 'loading'}</div>
-					<a href={bookmarkUrl} target="_blank" className='bookmarkCount'><span className="count">{this.state.bookmarkCount}</span><span className="usersText">users</span></a>
+					<div style={scoreStyle} className="score">{this._roundNum(this.props.data.score).toFixed(2)}</div>
+					{bookmarkCount}
 					<time className="date" dateTime={this.props.data.date}>{dateString}</time>
 					<div className="category">{this.props.data.category}</div>
 				</div>
@@ -151,7 +118,7 @@ export default class FeedItem extends React.Component{
 						{this.props.data.description}
 					</div>
 				</div>
-				<FeedItemBookmarkComments link={this.props.data.link} users={this.users} bookmarkComments={this.state.bookmarkComments}/>
+				<FeedItemBookmarkComments link={this.props.data.link} users={this.users} />
 			</div>
 		);
 	}
