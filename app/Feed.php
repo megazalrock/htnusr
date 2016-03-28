@@ -233,7 +233,7 @@ Class Feed extends DataBase{
 			$table_name = $this->feed_new_table_name;
 		}
 		
-		$limit_time = time() - 60 * 60 * 12;
+		$limit_time = time() - 60 * 60 * 24;
 		$query = 'SELECT * FROM ' . $table_name . ' WHERE date > :date OR (score IS NULL OR bookmarkCount IS NULL) ORDER BY date DESC LIMIT 0, ' . $limit;
 		$dbh = $this->connection();
 		$sth = $dbh->prepare($query);
@@ -277,7 +277,7 @@ Class Feed extends DataBase{
 		$this->delete_old_feed('hotentry');
 		$this->delete_old_feed('new');
 		echo 'Update hotentry feed score' . "\n";
-		$this->update_feed_score('hotentry');
+		$this->update_feed_score('hotentry', FEED_NUM);
 		echo 'Update new feed score' . "\n";
 		$this->update_feed_score('new', FEED_NUM);
 		echo 'Done !!';

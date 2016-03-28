@@ -291,6 +291,9 @@ class Users extends DataBase{
 		if(!is_array($users) && is_string($users)){
 			$users = array($users);
 		}
+		if(empty($users)){
+			return null;
+		}
 		$query_where = array();
 		foreach ($users as $userid) {
 			$query_where[]= '?';
