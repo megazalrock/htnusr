@@ -120,6 +120,13 @@ export default class Feed extends React.Component{
 			}else if(orderby === 'date'){
 				//日時降順
 				result = _.sortBy(feed, 'date').reverse();
+			}else if(orderby === 'score-bookmark'){
+				//スコアブクマ比
+				result = _.sortBy(feed, (feedItem) => {
+					let bookmarkCount = feedItem.bookmarkCount || 0;
+					let score = feedItem.score || 1;
+					return (score / bookmarkCount);
+				}).reverse();
 			}else if(orderby === 'smart'){
 				//Redditライク
 				result = _.sortBy(feed, (feedItem) => {

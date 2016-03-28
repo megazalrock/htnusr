@@ -24,6 +24,7 @@ export default class FeedMenu extends React.Component{
 						<option value="smart">スコア+日時</option>
 						<option value="score">スコア</option>
 						<option value="date">日時</option>
+						<option value="score-bookmark">スコア/ブクマ</option>
 					</select>
 				</div>
 				<div className="viewMode btnBox">
