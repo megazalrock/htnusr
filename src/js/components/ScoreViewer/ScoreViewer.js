@@ -36,29 +36,18 @@ export default class ScoreViewr extends React.Component{
 		this.setState({
 			buttonLabel: this.buttonLabels['loading']
 		});
-		this.users.getUsers(url)
+		this.users.getScore(url)
 			.then((data) => {
+				console.log(data);
 				result.bookmarkCount = data.bookmarkCount;
-				result.title = data.data.title;
-				result.entryUrl = data.data.entry_url;
-				result.url = data.data.url;
-				return this.users.getScore(data, null);
-			})
-			.then((score) => {
-				result.score = score;
+				result.score = data.score;
+				result.title = data.bookmark_info.title;
+				result.entryUrl = data.bookmark_info.entry_url;
+				result.url = data.bookmark_info.url;
 				this.setState({
-					results: this.state.results.concat(result)
-				});
-				this.setState({
+					results: this.state.results.concat(result),
 					buttonLabel: this.buttonLabels['get']
 				});
-
-			})
-			.fail(() => {
-				this.setState({
-					buttonLabel: this.buttonLabels['get']
-				});
-				alert('URLが存在しないっぽかったです。');
 			});
 	}
 
@@ -81,7 +70,21 @@ export default class ScoreViewr extends React.Component{
 		return(
 			<div className="scoreViewer">
 				<div className="form">
-					<input className="urlInput" name="url" type="url" placeholder="(http://)www.example.com" ref="inputUrl" onKeyUp={this.handleSubmit.bind(this)}/> <input className={"btn submitBtn" + (this.state.buttonLabel === 'loading...' ? ' active' : '')} type="button" value={this.state.buttonLabel} onClick={this.handleSubmit.bind(this)}/>
+					<input
+						className="urlInput"
+						name="url"
+						type="url"
+						placeholder="(http://)www.example.com"
+						ref="inputUrl"
+						onKeyUp={this.handleSubmit.bind(this)}
+					/>
+					<input
+						className={'btn submitBtn' + (this.state.buttonLabel === 'loading...' ? ' active' : '')}
+						type="button"
+						value={this.state.buttonLabel}
+						onClick={this.handleSubmit.bind(this)}
+						disabled={this.state.buttonLabel === 'loading...' ? ' disabled' : ''}
+					/>
 				</div>
 				<table className="resultTable">
 					<thead>

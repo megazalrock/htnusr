@@ -36,7 +36,24 @@ export default class Users {
 			}
 		})
 		.fail((...args) => {
-			deferred.reject(...args);
+			deferred.reject(args);
+		});
+		return deferred.promise();
+	}
+
+	getScore(url){
+		var deferred = $.Deferred();
+		this.getScoreAjax = $.ajax({
+			url: 'get_score.php',
+			data: {
+				url: url
+			}
+		})
+		.then((data) => {
+			deferred.resolve(data);
+		})
+		.fail((...args) => {
+			deferred.reject(args);
 		});
 		return deferred.promise();
 	}
