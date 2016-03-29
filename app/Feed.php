@@ -244,29 +244,45 @@ Class Feed extends DataBase{
 		$users = new Users();
 		$count = count($result);
 		foreach ($result as $index => $feed_item) {
-			$bookmark_info = HatenaAPI::fetch_bookmark_info($feed_item['link']);
-			if(!is_null($bookmark_info)){
-				echo ($index + 1) ." / ${count} " . $bookmark_info['title'] . "\n";
-				if(isset($bookmark_info['bookmarks'])){
-					$user_list = [];
-					foreach ($bookmark_info['bookmarks'] as $bookmark) {
-						$user_list[] = $bookmark['user'];
-					}
-					$score = $users->get_karma_sum($user_list, 0, $bookmark_info['count']);
-				}else{
-					$score = 0;
-				}
-				if(!is_null($score)){
-					$query = 'UPDATE ' . $table_name . ' SET score=:score, bookmarkCount=:bookmarkCount WHERE id=:id';
-					$sth = $dbh->prepare($query);
-					$sth->bindParam(':score', $score , PDO::PARAM_STR);
-					$sth->bindParam(':id', $feed_item['id'] , PDO::PARAM_STR);
-					$sth->bindParam(':bookmarkCount', $bookmark_info['count'], PDO::PARAM_INT);
-					$sth->execute();
-				}
+			$result = $this->get_url_score($feed_item['link']);
+			if(!is_null($result['score']) && !is_null($result['bookmarkCount']) && !empty($result['bookmark_info'])){
+				echo ($index + 1) ." / ${count} " . $result['bookmark_info']['title'] . "\n";
+				$query = 'UPDATE ' . $table_name . ' SET score=:score, bookmarkCount=:bookmarkCount WHERE id=:id';
+				$sth = $dbh->prepare($query);
+				$sth->bindParam(':score', $result['score'] , PDO::PARAM_STR);
+				$sth->bindParam(':id', $feed_item['id'] , PDO::PARAM_STR);
+				$sth->bindParam(':bookmarkCount', $result['bookmarkCount'], PDO::PARAM_INT);
+				$sth->execute();
 			}
 			usleep(0.5 * 1000000);
 		}
+	}
+
+	public function get_url_score($link){
+		$users = new Users();
+		$bookmark_info = HatenaAPI::fetch_bookmark_info($link);
+		$score = null;
+		$bookmarkCount = null;
+		if(!is_null($bookmark_info)){
+			$bookmarkCount = $bookmark_info['count'];
+			if(isset($bookmark_info['bookmarks'])){
+				$user_list = [];
+				foreach ($bookmark_info['bookmarks'] as $bookmark) {
+					$user_list[] = $bookmark['user'];
+				}
+				$score = $users->get_karma_sum($user_list, 0, $bookmark_info['count']);
+			}else{
+				$score = null;
+			}
+		}else{
+			$bookmarkCount = null;
+			$score = null;
+		}
+		return array(
+			'bookmark_info' => $bookmark_info,
+			'bookmarkCount' => $bookmarkCount,
+			'score' => $score
+		);
 	}
 
 	public function update_feed(){
