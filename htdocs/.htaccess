@@ -1,4 +1,6 @@
 #リクエストを全部index.htmlに
+Redirect 301 /about.html http://bh.mgzl.jp/about
+
 <ifModule mod_rewrite.c>
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
