@@ -88,7 +88,7 @@ export default class FeedItem extends React.Component{
 				);
 			}else{
 				return (
-					<div style={scoreStyle} className="score">{this._roundNum(this.props.data.score).toFixed(2)}</div>
+					<div style={scoreStyle} className="score">{this._roundNum(this.props.data.fixed_score).toFixed(2)}</div>
 				);
 			}
 		})();
