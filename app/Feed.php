@@ -126,7 +126,7 @@ Class Feed extends DataBase{
 	}
 
 
-	public function get_feed_data($type, $encodeJson = true, $order = 'ASC', $limit = null){
+	public function get_feed_data($type, $encodeJson = true, $order = 'ASC', $limit = 100){
 		if($type === 'hotentry'){
 			$table_name = $this->feed_hot_table_name;
 		}else if($type === 'new'){
@@ -226,6 +226,25 @@ Class Feed extends DataBase{
 		}
 	}
 
+	public function update_feed_data($type, $id, $bookmark_data){
+		if($type === 'hotentry'){
+			$table_name = $this->feed_hot_table_name;
+		}else if($type === 'new'){
+			$table_name = $this->feed_new_table_name;
+		}
+		try{
+			$query = 'UPDATE ' . $table_name . ' SET bookmarkData=:bookmarkData WHERE id=:id';
+			$dbh = $this->connection();
+			$sth = $dbh->prepare($query);
+			$sth->bindParam(':id', $id, PDO::PARAM_STR);
+			$sth->bindParam(':bookmarkData', $bookmark_data, PDO::PARAM_STR);
+			$result = $sth->execute();
+			return $result;
+		}catch(PDOException $e){
+			return false;
+		}
+	}
+
 	public function update_feed_score($type, $limit = 100){
 		if($type === 'hotentry'){
 			$table_name = $this->feed_hot_table_name;
@@ -247,11 +266,13 @@ Class Feed extends DataBase{
 			$result = $this->get_url_score($feed_item['link']);
 			if(!is_null($result['score']) && !is_null($result['bookmarkCount']) && !empty($result['bookmark_info'])){
 				echo ($index + 1) ." / ${count} " . $result['bookmark_info']['title'] . "\n";
-				$query = 'UPDATE ' . $table_name . ' SET score=:score, bookmarkCount=:bookmarkCount WHERE id=:id';
+				$query = 'UPDATE ' . $table_name . ' SET score=:score, fixed_score=:fixed_score, bookmarkCount=:bookmarkCount, bookmarkData=:bookmarkData WHERE id=:id';
 				$sth = $dbh->prepare($query);
 				$sth->bindParam(':score', $result['score'] , PDO::PARAM_STR);
+				$sth->bindParam(':fixed_score', $result['fixed_score'] , PDO::PARAM_STR);
 				$sth->bindParam(':id', $feed_item['id'] , PDO::PARAM_STR);
 				$sth->bindParam(':bookmarkCount', $result['bookmarkCount'], PDO::PARAM_INT);
+				$sth->bindParam(':bookmarkData', serialize($result['bookmark_info']), PDO::PARAM_STR);
 				$sth->execute();
 			}
 			usleep(0.5 * 1000000);
@@ -261,7 +282,10 @@ Class Feed extends DataBase{
 	public function get_url_score($link){
 		$users = new Users();
 		$bookmark_info = HatenaAPI::fetch_bookmark_info($link);
-		$score = null;
+		$scores = array(
+			'score' => null,
+			'fixed_score' => null,
+		);
 		$bookmarkCount = null;
 		if(!is_null($bookmark_info)){
 			$bookmarkCount = $bookmark_info['count'];
@@ -270,18 +294,25 @@ Class Feed extends DataBase{
 				foreach ($bookmark_info['bookmarks'] as $bookmark) {
 					$user_list[] = $bookmark['user'];
 				}
-				$score = $users->get_karma_sum($user_list, 0, $bookmark_info['count']);
+				$scores = $users->get_karma_sum($user_list, 0, $bookmark_info['count']);
 			}else{
-				$score = null;
+				$scores = array(
+					'score' => null,
+					'fixed_score' => null,
+				);
 			}
 		}else{
 			$bookmarkCount = null;
-			$score = null;
+			$scores = array(
+				'score' => null,
+				'fixed_score' => null,
+			);
 		}
 		return array(
 			'bookmark_info' => $bookmark_info,
 			'bookmarkCount' => $bookmarkCount,
-			'score' => $score
+			'score' => $scores['score'],
+			'fixed_score'=> $scores['fixed_score']
 		);
 	}
 

@@ -116,7 +116,7 @@ export default class Feed extends React.Component{
 			}else if(orderby === 'score'){
 				//スコア降順
 				result = _.sortBy(feed, (feedItem) => {
-					return !_.isNull(feedItem.score) ? feedItem.score : -Infinity;
+					return !_.isNull(feedItem.fixed_score) ? feedItem.fixed_score : -Infinity;
 				}).reverse();
 			}else if(orderby === 'date'){
 				//日時降順
@@ -126,7 +126,7 @@ export default class Feed extends React.Component{
 				result = _.sortBy(feed, (feedItem) => {
 					if(feedItem.bookmarkCount){
 						let bookmarkCount = feedItem.bookmarkCount || 0;
-						let score = feedItem.score || 1;
+						let score = feedItem.fixed_score || 1;
 						return (score / bookmarkCount);
 					}else{
 						return -Infinity;
@@ -137,7 +137,7 @@ export default class Feed extends React.Component{
 				result = _.sortBy(feed, (feedItem) => {
 					if(feedItem.bookmarkCount){
 						let bookmarkCount = feedItem.bookmarkCount || 0;
-						let score = feedItem.score;
+						let score = feedItem.fixed_score;
 						let bsretio = score / bookmarkCount;
 						let seconds = feedItem.date;
 						let order = Math.log10(Math.max(Math.abs(score), 1));

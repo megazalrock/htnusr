@@ -41,6 +41,7 @@ export default class ScoreViewr extends React.Component{
 				console.log(data);
 				result.bookmarkCount = data.bookmarkCount;
 				result.score = data.score;
+				result.fixed_score = data.fixed_score;
 				result.title = data.bookmark_info.title;
 				result.entryUrl = data.bookmark_info.entry_url;
 				result.url = data.bookmark_info.url;
@@ -60,7 +61,7 @@ export default class ScoreViewr extends React.Component{
 		var results = this.state.results.map((result, key) => {
 			return (
 				<tr key={key}>
-					<td className="score">{this._roundNum(result.score, 2).toFixed(2)}</td>
+					<td className="score">{this._roundNum(result.fixed_score, 2).toFixed(2)}</td>
 					<td className="bookmarkCountBox"><a className="bookmarkCount" href={result.entryUrl} target="_blank">{result.bookmarkCount}users</a></td>
 					<td className="pageTitle"><a href={result.url} target="_blank">{result.title}</a></td>
 				</tr>
