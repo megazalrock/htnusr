@@ -13,7 +13,7 @@ if(!isset($argv[1])){
 $type = $argv[1];
 
 $feed = new Feed();
-$items = $feed->get_feed_data($type, false, 'DESC');
+$items = $feed->get_feed_data($type, false, 'DESC', 100);
 
 foreach ($items as $key => $item) {
 	$bookmark_info = HatenaAPI::fetch_bookmark_info($item['link']);

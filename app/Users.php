@@ -298,7 +298,7 @@ class Users extends DataBase{
 		foreach ($users as $userid) {
 			$query_where[]= '?';
 		}
-		$query = 'SELECT SUM(karma) FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . ')) AND karma IS NOT NULL';
+		$query = 'SELECT * FROM ' . $this->user_table_name . ' WHERE (name IN (' . implode(', ', $query_where) . ')) AND karma IS NOT NULL';
 		try{	
 			$dbh = $this->connection();
 			$sth = $dbh->prepare($query);
@@ -306,9 +306,48 @@ class Users extends DataBase{
 				$sth->bindValue($key + 1, $userid, PDO::PARAM_STR);
 			}
 			$sth->execute();
-			$result = $sth->fetchAll(PDO::FETCH_COLUMN);
-			$result = ($result[0]);
-			return $result;
+			$result = $sth->fetchAll(PDO::FETCH_ASSOC);
+			usort($result, function($users){
+				return function($a, $b) use ($users){
+					$a_index = array_search($a['name'], $users);
+					$b_index = array_search($b['name'], $users);
+					return $b_index - $a_index;
+				};
+			});
+			$score = 0;
+			$fixed_score = 0;
+			foreach ($result as $key => $user) {
+				if($key < 3){
+					$rato = 1;
+				}else{
+					$rato = 1 / sqrt( sqrt(ceil( ($key - 2) / 10 )) );
+					//var_dump(ceil( ($key - 2) / 10 ));
+					/*if($key - 2){
+
+					}
+					$rato = 1 / sqrt($key - 1);*/
+				}
+				//var_dump($key . ' ' . $rato);
+				/*if($key <= 10){
+					$rato = 1;
+				}else if($key <= 20){
+					$rato = 0.75;
+				}else if($key <= 30){
+					$rato = 0.5;
+				}else if($key <= 40){
+					$rato = 0.25;
+				}else if($key <= 50){
+					$rato = 0.1;
+				}*/
+				$score += $user['karma'];
+				$fixed_score += ($user['karma'] * $rato);
+			}
+			//var_dump(array_search('jtw', $users));
+			//$result = ($result[0]);
+			return array(
+				'score' => $score,
+				'fixed_score' => $fixed_score
+			);
 		}catch(PDOException $e){
 			echo $e->getMessage();
 		}
