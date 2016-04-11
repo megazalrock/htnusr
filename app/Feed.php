@@ -226,6 +226,25 @@ Class Feed extends DataBase{
 		}
 	}
 
+	public function update_feed_data($type, $id, $bookmark_data){
+		if($type === 'hotentry'){
+			$table_name = $this->feed_hot_table_name;
+		}else if($type === 'new'){
+			$table_name = $this->feed_new_table_name;
+		}
+		try{
+			$query = 'UPDATE ' . $table_name . ' SET bookmarkData=:bookmarkData WHERE id=:id';
+			$dbh = $this->connection();
+			$sth = $dbh->prepare($query);
+			$sth->bindParam(':id', $id, PDO::PARAM_STR);
+			$sth->bindParam(':bookmarkData', $bookmark_data, PDO::PARAM_STR);
+			$result = $sth->execute();
+			return $result;
+		}catch(PDOException $e){
+			return false;
+		}
+	}
+
 	public function update_feed_score($type, $limit = 100){
 		if($type === 'hotentry'){
 			$table_name = $this->feed_hot_table_name;

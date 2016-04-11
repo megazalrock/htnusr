@@ -1,0 +1,28 @@
+#!/usr/local/bin/php
+<?php
+date_default_timezone_set('Asia/Tokyo');
+require_once (dirname(__FILE__) . '/app/Constant.php');
+require_once (dirname(__FILE__) . '/app/Hatena.php');
+require_once (dirname(__FILE__) . '/app/Feed.php');
+
+if(!isset($argv[1])){
+	echo 'type is empty';
+	die;
+}
+
+$type = $argv[1];
+
+$feed = new Feed();
+$items = $feed->get_feed_data($type, false, 'DESC');
+
+foreach ($items as $key => $item) {
+	$bookmark_info = HatenaAPI::fetch_bookmark_info($item['link']);
+	$result = $feed->update_feed_data($type, $item['id'], serialize($bookmark_info));
+	$echo_string = $item['title'] . "\n";
+	if(!$result){
+		$echo_string = 'feild ' . $echo_string;
+	}
+	echo $echo_string;
+	usleep(500000);
+}
+?>
