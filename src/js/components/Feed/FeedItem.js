@@ -17,7 +17,7 @@ export default class FeedItem extends React.Component{
 	render(){
 		var bookmarkUrl = 'http://b.hatena.ne.jp/entry/' + (this.props.data.link.match(/^https/) ? 's/' : '') + this.props.data.link.replace(/^https?:\/\//, '');
 		var scoreColor;
-		var scoreSaturation = Math.abs(this.props.data.score);
+		var scoreSaturation = Math.abs(this.props.data.fixed_score);
 		var s = 0;
 		if(100 < scoreSaturation){
 			scoreSaturation = 100;
@@ -37,7 +37,7 @@ export default class FeedItem extends React.Component{
 			return c*t*t*t + b;
 		};
 
-		if(this.props.data.score < 0){ //minus
+		if(this.props.data.fixed_score < 0){ //minus
 			s = cubeIn(scoreSaturation, 0, 0.5, 10);
 			s *= 100;
 			s = this._roundNum(s, 0);
@@ -45,7 +45,7 @@ export default class FeedItem extends React.Component{
 				s = 50;
 			}
 			scoreColor = 'hsl(0, ' + s + '%, 50%)';
-		}else if(0 < this.props.data.score){ //plus
+		}else if(0 < this.props.data.fixed_score){ //plus
 			s = linear(scoreSaturation, 0, 0.4, 100);
 			s *= 100;
 			s = this._roundNum(s, 0);
@@ -82,7 +82,7 @@ export default class FeedItem extends React.Component{
 			});
 		})();
 		var scoreString = (() => {
-			if(_.isNull(this.props.data.score)){
+			if(_.isNull(this.props.data.fixed_score)){
 				return (
 					<div style={scoreStyle} className="score">no data</div>
 				);
