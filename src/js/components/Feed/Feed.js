@@ -10,13 +10,24 @@ const strage = window.localStorage;
 export default class Feed extends React.Component{
 	constructor(props){
 		super(props);
+		this.recommendFilterParam = {
+			score: 15,
+			bookmarkCount: 30,
+			scoreBookmarkRato: 0.15
+		};
 		this.state = {
 			feed: [],
 			mode: null,
 			viewMode: strage.getItem('viewMode') || 'text',
 			isLoading: true,
 			orderby_new: strage.getItem('orderby_new') || 'default',
-			orderby_hotentry: strage.getItem('orderby_hotentry') || 'default'
+			orderby_hotentry: strage.getItem('orderby_hotentry') || 'default',
+			filterParams : strage.getItem('filterParams') ? JSON.parse(strage.getItem('filterParams')) : {
+				score: null,
+				bookmarkCount: null,
+				scoreBookmarkRato: null
+			},
+			filterMode: strage.getItem('filterMode') || 'recommend'//'recommend'
 		};
 		this.feedCache = [];
 		this.sortedFeeds = {
@@ -178,8 +189,68 @@ export default class Feed extends React.Component{
 		this.setSortedFeed(this.state.feed, orderby);
 	}
 
+	onChangeFilterMode(filterMode){
+		this.setState({ filterMode: filterMode });
+		strage.setItem('filterMode', filterMode);
+	}
+
+	onChangeFilterParams(filterParams){
+		this.setState({ filterParams: filterParams });
+		strage.setItem('filterParams', JSON.stringify(this.state.filterParams));
+	}
+
+	filterFeed(feed){
+		var filterFunction = (() => {
+			var result;
+			if(this.state.filterMode === 'recommend'){
+				result = (item) => {
+					if(
+						(item.bookmarkCount > this.recommendFilterParam.bookmarkCount && item.fixed_score / item.bookmarkCount < this.recommendFilterParam.scoreBookmarkRato) ||
+						(item.fixed_score < this.recommendFilterParam.score)
+					){
+						return false;
+					}else{
+						return true;
+					}
+				};
+			}else if(this.state.filterMode === 'user'){
+				let bookmarkCount = (_.isNumber(this.state.filterParams.bookmarkCount)) ? this.state.filterParams.bookmarkCount : -Infinity;
+				let score = (_.isNumber(this.state.filterParams.score )) ? this.state.filterParams.score : -Infinity;
+				let scoreBookmarkRato = (_.isNumber(this.state.filterParams.scoreBookmarkRato)) ? this.state.filterParams.scoreBookmarkRato : -Infinity;
+				result = (item) => {
+					if(
+						(item.bookmarkCount < bookmarkCount) ||
+						(item.fixed_score < score) ||
+						((item.fixed_score / item.bookmarkCount) < scoreBookmarkRato)
+					){
+						return false;
+					}else{
+						return true;
+					}
+				};
+			}else{
+				result = false;
+			}
+			return result;
+		})();
+
+		if(_.isFunction(filterFunction)){
+			var result = _.filter(feed, filterFunction);
+			if(!result){
+				result = [];
+			}
+			return result;
+		}else{
+			return feed;
+		}
+	}
+
 	render(){
-		var feedList = this.state.feed.map((item)=>{
+		var filterdFeed = this.filterFeed(this.state.feed);
+		if(!_.isArray(filterdFeed)){
+			return null;
+		}
+		var feedList = filterdFeed.map((item)=>{
 			return (
 				<FeedItem
 					handleOnAjaxEnd={this.itemAjaxEnd.bind(this)}
@@ -199,6 +270,10 @@ export default class Feed extends React.Component{
 					mode={this.props.route.mode}
 					route={this.props.route}
 					viewMode={this.state.viewMode}
+					filterMode={this.state.filterMode}
+					filterParams={this.state.filterParams}
+					handleOnChangeFilterMode={this.onChangeFilterMode.bind(this)}
+					handleOnChangeFilterParams={this.onChangeFilterParams.bind(this)}
 				/>
 				<div className={'feedList' + (this.state.isLoading ? ' loading' : '')}>
 					<div className="loadingAnime"></div>

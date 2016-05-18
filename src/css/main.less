@@ -100,20 +100,59 @@ h1{
 }
 
 .ui{
-	display: flex;
-	flex-flow:row wrap;
-    justify-content: space-between;
-	.btnBox{
-   		flex: 0 0 auto;
-  		margin-bottom: @baseMargin;
-		vertical-align: top;
-		&.viewMode{
-		}
-		.btn{
-			margin-right: 1px;
-		}
-		.orderby{
+	.setting{
+		display: flex;
+		flex-flow:row wrap;
+		justify-content: space-between;
+		user-select: none;
+		.btnBox{
+			flex: 0 0 auto;
+			margin-bottom: @baseMargin;
 			vertical-align: top;
+			&.viewMode{
+			}
+			.btn{
+				margin-right: 1px;
+			}
+			.orderby{
+				vertical-align: top;
+			}
+		}
+	}
+	.detailSetting{
+		display: none;
+		&.visible{
+			display: block;
+		}
+		.userFilterSetting{
+			display: none;
+			&.visible{
+				display: block;
+			}
+			.inputBoxes{
+				display: flex;
+				flex-flow:row wrap;
+				justify-content: flex-start;
+				.inputBox{
+					flex: 0.1 0 auto;
+					label{
+						font-size: small;
+						user-select: none;
+						&.withCheckBox{
+							cursor:pointer;
+						}
+					}
+					input[type=number]{
+						width: 4em;
+						height:1.2em;
+						margin: 0 0.25em;
+					}
+					input[type=checkbox]{
+						vertical-align: middle;
+						margin-right: 0.5em;
+					}
+				}
+			}
 		}
 	}
 }
