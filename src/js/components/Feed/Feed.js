@@ -4,12 +4,12 @@ import _ from 'lodash';
 import React from 'react';
 import FeedMenu from './FeedMenu';
 import FeedItem from './FeedItem';
-
-const strage = window.localStorage;
+import SettingManager from '../../SettingManager.js';
 
 export default class Feed extends React.Component{
 	constructor(props){
 		super(props);
+		this.setting = new SettingManager();
 		this.recommendFilterParam = {
 			score: 15,
 			bookmarkCount: 30,
@@ -18,16 +18,18 @@ export default class Feed extends React.Component{
 		this.state = {
 			feed: [],
 			mode: null,
-			viewMode: strage.getItem('viewMode') || 'text',
-			isLoading: true,
-			orderby_new: strage.getItem('orderby_new') || 'default',
-			orderby_hotentry: strage.getItem('orderby_hotentry') || 'default',
-			filterParams : strage.getItem('filterParams') ? JSON.parse(strage.getItem('filterParams')) : {
-				score: null,
-				bookmarkCount: null,
-				scoreBookmarkRato: null
-			},
-			filterMode: strage.getItem('filterMode') || 'recommend'//'recommend'
+			setting: _.defaultsDeep(this.setting.get(), {
+				viewMode: 'text',
+				orderby_hotentry: 'default',
+				orderby_new: 'default',
+				filterMode: 'recommend',
+				filterParams: {
+					score: null,
+					bookmarkCount: null,
+					scoreBookmarkRato: null
+				}
+			}),
+			isLoading: true
 		};
 		this.feedCache = [];
 		this.sortedFeeds = {
@@ -83,24 +85,22 @@ export default class Feed extends React.Component{
 		}
 	}
 
-	setViewMode(mode){
-		if(mode !== this.state.viewMode){
-			this.setState({
-				viewMode: mode
+	setViewMode(viewMode){
+		if(viewMode !== this.state.setting.viewMode){
+			this.setting.save('viewMode', viewMode, () => {
+				this.setState({ setting: _.defaultsDeep({viewMode : viewMode}, this.state.setting) });
 			});
-			strage.setItem('viewMode', mode);
-			ga && ga('send', 'event', 'Header UI', 'Change View', mode);
+			ga && ga('send', 'event', 'Header UI', 'Change View', viewMode);
 		}
 	}
 
 	setFeedType(mode){
-		if(mode !== this.state.mode){
+		if(mode !== this.state.setting.mode){
 			this.onAjaxLoadingStart();
-			this.setState({
-				mode: mode
-			});
 			this._getRss(mode);
-			strage.setItem('mode', mode);
+			this.setting.save('mode', mode, () => {
+				this.setState({ setting: _.defaultsDeep({mode : mode}, this.state.setting) });
+			});
 			ga && ga('send', 'event', 'Header UI', 'Change Feed', mode);
 		}
 	}
@@ -181,7 +181,7 @@ export default class Feed extends React.Component{
 		newState['orderby_' + this.props.route.mode] = orderby;
 		newState = _.defaultsDeep(newState, setWith);
 		this.setState(newState);
-		strage.setItem('orderby_' + this.props.route.mode, orderby);
+		this.setting.save('orderby_' + this.props.route.mode, orderby);
 		ga && ga('send', 'event', 'Header UI', 'Sort Feed', orderby);
 	}
 
@@ -190,13 +190,15 @@ export default class Feed extends React.Component{
 	}
 
 	onChangeFilterMode(filterMode){
-		this.setState({ filterMode: filterMode });
-		strage.setItem('filterMode', filterMode);
+		this.setting.save('filterMode', filterMode, () => {
+			this.setState({ setting: _.defaultsDeep({filterMode : filterMode}, this.state.setting) });
+		});
 	}
 
 	onChangeFilterParams(filterParams){
-		this.setState({ filterParams: filterParams });
-		strage.setItem('filterParams', JSON.stringify(this.state.filterParams));
+		this.setting.save('filterParams', filterParams, () => {
+			this.setState({ setting: _.defaultsDeep({filterParams: filterParams}, this.state.setting) });
+		});
 	}
 
 	filterFeed(feed){
@@ -256,8 +258,8 @@ export default class Feed extends React.Component{
 					handleOnAjaxEnd={this.itemAjaxEnd.bind(this)}
 					key={item.id}
 					data={item}
-					mode={this.state.mode}
-					viewMode={this.state.viewMode}
+					mode={this.state.setting.mode}
+					viewMode={this.state.setting.viewMode}
 				/>
 			);
 		});
@@ -266,18 +268,16 @@ export default class Feed extends React.Component{
 				<FeedMenu
 					handleOnChangeOrderby={this.onChangeOrderby.bind(this)}
 					handleSetViewMode={this.setViewMode.bind(this)}
-					orderby={this.state['orderby_' + this.props.route.mode]}
 					mode={this.props.route.mode}
 					route={this.props.route}
-					viewMode={this.state.viewMode}
-					filterMode={this.state.filterMode}
-					filterParams={this.state.filterParams}
+					orderby={this.state.setting['orderby_' + this.props.route.mode]}
+					setting={this.state.setting}
 					handleOnChangeFilterMode={this.onChangeFilterMode.bind(this)}
 					handleOnChangeFilterParams={this.onChangeFilterParams.bind(this)}
 				/>
 				<div className={'feedList' + (this.state.isLoading ? ' loading' : '')}>
 					<div className="loadingAnime"></div>
-					<div className={'feedListBox view-' + (this.state.viewMode)}>
+					<div className={'feedListBox view-' + (this.state.setting.viewMode)}>
 						{feedList}
 					</div>
 				</div>

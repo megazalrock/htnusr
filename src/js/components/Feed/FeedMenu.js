@@ -28,10 +28,10 @@ export default class FeedMenu extends React.Component{
 	}
 
 	dispatchOnChangeFilterParam(e){
-		var filterParams = {
-			bookmarkCount : this.state.bookmarkCount,
-			score : this.state.score,
-			scoreBookmarkRato : this.state.scoreBookmarkRato
+		/*var filterParams = {
+			bookmarkCount : this.state.setting.bookmarkCount,
+			score : this.setting.state.score,
+			scoreBookmarkRato : this.state.setting.scoreBookmarkRato
 		};
 		filterParams[e.target.name] = Number(e.target.value);
 		if(!_.isNumber(filterParams[e.target.name])){
@@ -39,25 +39,14 @@ export default class FeedMenu extends React.Component{
 		}
 		this.setState(filterParams);
 		this.props.handleOnChangeFilterParams(filterParams);
-
-		/*if(e.target.name === 'score'){
-
-		}
-		if(e.target.name === 'bookmarkCount'){
-
-		}
-		if(e.target.name === 'bookmar')*/
-		//this.props.handleOnChangeFilterParams($.extend(this.props.filterParams));
-		/*console.dir(e.target.name);
-		console.log(Number(e.target.value));*/
-	}
+	}*/
 
 	toggleDetailSettingVisibility(){
 		this.setState({ isDetailSettingVisible : !this.state.isDetailSettingVisible });
 	}
 
 	toggleFilterParamCheckbox(e){
-		var _obj = {};
+		/*var _obj = {};
 		_obj[e.target.name] = e.target.checked;
 		var keyName;
 		if(e.target.name === 'isBookmarkCountEnable'){
@@ -68,8 +57,8 @@ export default class FeedMenu extends React.Component{
 			keyName = 'scoreBookmarkRato';
 		}
 		var filterParams = {
-			bookmarkCount : this.state.bookmarkCount,
-			score : this.state.score,
+			bookmarkCount : this.state.setting.bookmarkCount,
+			score : this.state.setting.score,
 			scoreBookmarkRato : this.state.scoreBookmarkRato
 		};
 		var value = null;
@@ -79,7 +68,7 @@ export default class FeedMenu extends React.Component{
 		filterParams[keyName] = value;
 		this.props.handleOnChangeFilterParams(filterParams);
 		_obj[keyName] = value;
-		this.setState(_obj);
+		this.setState(_obj);*/
 	}
 
 	render(){
@@ -99,18 +88,18 @@ export default class FeedMenu extends React.Component{
 						<div className={'btn toggleDetailSettingVisibility' + (this.state.isDetailSettingVisible ? ' selected' : '')} onClick={this.toggleDetailSettingVisibility.bind(this)}>詳細設定</div>
 					</div>
 					<div className="viewMode btnBox">
-						<div className={'title btn' + (this.props.viewMode === 'title' ? ' selected' : '')} onClick={this.dispatchSetViewMode.bind(this, 'title')}>タイトルのみ</div>
-						<div className={'text btn' + (this.props.viewMode === 'text' ? ' selected' : '')} onClick={this.dispatchSetViewMode.bind(this, 'text')}>簡易表示</div>
-						<div className={'image btn' + (this.props.viewMode === 'image' ? ' selected' : '')} onClick={this.dispatchSetViewMode.bind(this, 'image')}>画像表示</div>
+						<div className={'title btn' + (this.props.setting.viewMode === 'title' ? ' selected' : '')} onClick={this.dispatchSetViewMode.bind(this, 'title')}>タイトルのみ</div>
+						<div className={'text btn' + (this.props.setting.viewMode === 'text' ? ' selected' : '')} onClick={this.dispatchSetViewMode.bind(this, 'text')}>簡易表示</div>
+						<div className={'image btn' + (this.props.setting.viewMode === 'image' ? ' selected' : '')} onClick={this.dispatchSetViewMode.bind(this, 'image')}>画像表示</div>
 					</div>
 				</div>
 				<div className={'detailSetting' + (this.state.isDetailSettingVisible ? ' visible' : '')}>
 					<div className="filterMode">
-						<div className={'detail btn' + (this.props.filterMode === 'none' ? ' selected' : '')} onClick={this.dispatchOnChangeFilterMode.bind(this, 'none')}>なし</div>
-						<div className={'detail btn' + (this.props.filterMode === 'recommend' ? ' selected' : '')} onClick={this.dispatchOnChangeFilterMode.bind(this, 'recommend')}>オススメ</div>
-						<div className={'detail btn' + (this.props.filterMode === 'user' ? ' selected' : '')} onClick={this.dispatchOnChangeFilterMode.bind(this, 'user')}>ユーザー設定</div>
+						<div className={'detail btn' + (this.props.setting.filterMode === 'none' ? ' selected' : '')} onClick={this.dispatchOnChangeFilterMode.bind(this, 'none')}>なし</div>
+						<div className={'detail btn' + (this.props.setting.filterMode === 'recommend' ? ' selected' : '')} onClick={this.dispatchOnChangeFilterMode.bind(this, 'recommend')}>オススメ</div>
+						<div className={'detail btn' + (this.props.setting.filterMode === 'user' ? ' selected' : '')} onClick={this.dispatchOnChangeFilterMode.bind(this, 'user')}>ユーザー設定</div>
 					</div>
-					<div className={'userFilterSetting' + (this.props.filterMode === 'user' ? ' visible' : '')}>
+					<div className={'userFilterSetting' + (this.props.setting.filterMode === 'user' ? ' visible' : '')}>
 						<p>下記の条件に当てはまるものは表示しません。</p>
 						<div className="inputBoxes">
 							<div className="inputBox">
@@ -126,7 +115,7 @@ export default class FeedMenu extends React.Component{
 								<input
 									disabled={this.state.isBookmarkCountEnable ? '' : ' disable'}
 									id="input-bookmarkCount" name="bookmarkCount" type="number" min="0"
-									defaultValue={this.props.filterParams.bookmarkCount}
+									defaultValue={this.props.setting.filterParams.bookmarkCount}
 									onChange={this.dispatchOnChangeFilterParam.bind(this)}
 								/>
 								<label>未満</label>
@@ -144,7 +133,7 @@ export default class FeedMenu extends React.Component{
 								<input
 									id="input-score" name="score" type="number"
 									disabled={this.state.isScoreEnable ? '' : ' disable'}
-									defaultValue={this.props.filterParams.score}
+									defaultValue={this.props.setting.filterParams.score}
 									onChange={this.dispatchOnChangeFilterParam.bind(this)}
 								/>
 								<label>未満</label>
@@ -162,7 +151,7 @@ export default class FeedMenu extends React.Component{
 								<input
 									id="input-rato" name="scoreBookmarkRato" type="number" step="0.1"
 									disabled={this.state.isScoreBookmarkRatoEnable ? '' : ' disable'}
-									defaultValue={this.props.filterParams.scoreBookmarkRato}
+									defaultValue={this.props.setting.filterParams.scoreBookmarkRato}
 									onChange={this.dispatchOnChangeFilterParam.bind(this)}
 								/>
 								<label>未満</label>
