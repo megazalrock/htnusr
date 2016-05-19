@@ -38,8 +38,8 @@ export default class FeedMenu extends React.Component{
 			alert('数値で入力して下さい。');
 		}
 		this.setState(filterParams);
-		this.props.handleOnChangeFilterParams(filterParams);
-	}*/
+		this.props.handleOnChangeFilterParams(filterParams);*/
+	}
 
 	toggleDetailSettingVisibility(){
 		this.setState({ isDetailSettingVisible : !this.state.isDetailSettingVisible });
