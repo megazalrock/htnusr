@@ -56,6 +56,7 @@ h1{
 	color: @btnFontColor;
 	box-sizing: border-box;
 	border: 1px solid rgba(0, 0, 0, 0);
+	user-select: none;
 	/*@keyframes btnSelect{
 		from{
 			box-shadow: @btnShadow;
@@ -100,21 +101,111 @@ h1{
 }
 
 .ui{
-	display: flex;
-	flex-flow:row wrap;
-    justify-content: space-between;
-	.btnBox{
-   		flex: 0 0 auto;
-  		margin-bottom: @baseMargin;
-		vertical-align: top;
-		&.viewMode{
+	.setting{	
+		display: flex;
+		flex-flow:row wrap;
+		justify-content: space-between;
+		user-select: none;
+		.btnBox{
+			display: flex;
+			flex-flow:row wrap;
+			justify-content: flex-start;
+			margin-bottom: @baseMargin;
+			&.viewMode{
+			}
+			.btn{
+				margin-right: 1px;
+			}
+			.orderby{
+				vertical-align: top;
+			}
 		}
-		.btn{
-			margin-right: 1px;
+		.infomation{
+			font-size: small;
 		}
-		.orderby{
-			vertical-align: top;
+	}
+	.detailSetting{
+		display: none;
+		padding: @baseMargin*2 @baseMargin;
+		border: 1px solid #CCC;
+		&.visible{
+			display: block;
 		}
+		.detailSettingItem{
+			display: flex;
+			flex-flow:row wrap;
+			justify-content: flex-start;
+			margin-bottom: @baseMargin * 2;
+			padding-bottom: @baseMargin * 2;
+			border-bottom: 1px solid #CCC;
+			&:last-child{
+				margin-bottom: 0;
+				padding-bottom: 0;
+				border-bottom: none;
+			}
+			.title{
+				flex: 0 0 auto;
+				margin: @btnFontSize / 2 @baseMargin @btnFontSize / 2 0;
+				line-height: 1;
+			}
+			.contents{
+				flex: 1 0 auto;
+				max-width: 100%;
+				margin-bottom: @baseMargin;
+			}
+			.description{
+				width: 100%;
+				font-size: small;
+				line-height: 1.2;
+				p{
+					margin: 0;
+				}
+			}
+			&.filtering{
+				.contents{
+					margin-bottom: 0;	
+					.filterMode{
+						margin-bottom: @baseMargin;
+					}
+					.userFilterSetting{
+						display: none;
+						margin-top: @baseMargin;
+						&.visible{
+							display: block;
+						}
+						.inputBoxes{
+							display: flex;
+							flex-flow:row wrap;
+							justify-content: flex-start;
+							.inputBox{
+								flex: 0 0 auto;
+								margin:0 @baseMargin @baseMargin 0;
+								&.disabled .disableable{
+									opacity: 0.5;
+								}
+								label{
+									font-size: small;
+									user-select: none;
+									&.withCheckBox{
+										cursor:pointer;
+									}
+								}
+								input[type=number]{
+									width: 4em;
+									height:1.2em;
+									margin: 0 0.25em;
+								}
+								input[type=checkbox]{
+									vertical-align: middle;
+									margin-right: 0.5em;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 	}
 }
 .feedList{
