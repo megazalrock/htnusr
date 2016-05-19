@@ -1,6 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router';
 import _ from 'lodash';
+import UpdateInfo from './UpdateInfo';
 export default class FeedMenu extends React.Component{
 	constructor(props){
 		super(props);
@@ -67,15 +68,23 @@ export default class FeedMenu extends React.Component{
 						</select>
 						<div className={'btn toggleDetailSettingVisibility' + (this.state.isDetailSettingVisible ? ' selected' : '')} onClick={this.toggleDetailSettingVisibility.bind(this)}>詳細設定</div>
 					</div>
-					<div className="viewMode btnBox">
-						<div className={'title btn' + (this.props.setting.viewMode === 'title' ? ' selected' : '')} onClick={this.dispatchSetViewMode.bind(this, 'title')}>タイトルのみ</div>
-						<div className={'text btn' + (this.props.setting.viewMode === 'text' ? ' selected' : '')} onClick={this.dispatchSetViewMode.bind(this, 'text')}>簡易表示</div>
-						<div className={'image btn' + (this.props.setting.viewMode === 'image' ? ' selected' : '')} onClick={this.dispatchSetViewMode.bind(this, 'image')}>画像表示</div>
+					<div className="infomation">
+						<UpdateInfo />
 					</div>
 				</div>
 				<div className={'detailSetting' + (this.state.isDetailSettingVisible ? ' visible' : '')}>
+					<div className="detailSettingItem">
+						<div className="title">表示</div>
+						<div className="contents">
+							<div className="viewMode">
+								<div className={'titleOnly btn' + (this.props.setting.viewMode === 'title' ? ' selected' : '')} onClick={this.dispatchSetViewMode.bind(this, 'title')}>タイトルのみ</div>
+								<div className={'text btn' + (this.props.setting.viewMode === 'text' ? ' selected' : '')} onClick={this.dispatchSetViewMode.bind(this, 'text')}>簡易表示</div>
+								<div className={'image btn' + (this.props.setting.viewMode === 'image' ? ' selected' : '')} onClick={this.dispatchSetViewMode.bind(this, 'image')}>画像表示</div>
+							</div>
+						</div>
+					</div>
 					<div className="detailSettingItem filtering">
-						<div className="title">フィルタリング設定</div>
+						<div className="title">フィルタリング</div>
 						<div className="contents">
 							<div className="filterMode">
 								<div className={'detail btn' + (this.props.setting.filterMode[this.props.mode] === 'none' ? ' selected' : '')} onClick={this.dispatchOnChangeFilterMode.bind(this, 'none')}>なし</div>

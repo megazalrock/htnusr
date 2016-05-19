@@ -101,15 +101,16 @@ h1{
 }
 
 .ui{
-	.setting{
+	.setting{	
 		display: flex;
 		flex-flow:row wrap;
 		justify-content: space-between;
 		user-select: none;
 		.btnBox{
-			flex: 0 0 auto;
+			display: flex;
+			flex-flow:row wrap;
+			justify-content: flex-start;
 			margin-bottom: @baseMargin;
-			vertical-align: top;
 			&.viewMode{
 			}
 			.btn{
@@ -119,17 +120,23 @@ h1{
 				vertical-align: top;
 			}
 		}
+		.infomation{
+			font-size: small;
+		}
 	}
 	.detailSetting{
 		display: none;
-		padding: @baseMargin;
+		padding: @baseMargin*2 @baseMargin;
 		border: 1px solid #CCC;
 		&.visible{
 			display: block;
 		}
 		.detailSettingItem{
-			margin-bottom: @baseMargin;
-			padding-bottom: @baseMargin;
+			display: flex;
+			flex-flow:row wrap;
+			justify-content: flex-start;
+			margin-bottom: @baseMargin * 2;
+			padding-bottom: @baseMargin * 2;
 			border-bottom: 1px solid #CCC;
 			&:last-child{
 				margin-bottom: 0;
@@ -137,20 +144,17 @@ h1{
 				border-bottom: none;
 			}
 			.title{
+				flex: 0 0 auto;
+				margin: @btnFontSize / 2 @baseMargin @btnFontSize / 2 0;
 				line-height: 1;
-				&:before{
-					vertical-align: middle;
-					display: inline-block;
-					content: "";
-					border-left: 5px solid #000;
-					height: 5px;
-					margin-right: 0.5em;
-				}
 			}
 			.contents{
-				margin: @baseMargin 0;
+				flex: 1 0 auto;
+				max-width: 100%;
+				margin-bottom: @baseMargin;
 			}
 			.description{
+				width: 100%;
 				font-size: small;
 				line-height: 1.2;
 				p{
@@ -174,8 +178,8 @@ h1{
 							flex-flow:row wrap;
 							justify-content: flex-start;
 							.inputBox{
-								flex: 0.1 1 auto;
-								margin-bottom: @baseMargin;
+								flex: 0 0 auto;
+								margin:0 @baseMargin @baseMargin 0;
 								&.disabled .disableable{
 									opacity: 0.5;
 								}
