@@ -22,11 +22,27 @@ export default class Feed extends React.Component{
 				viewMode: 'text',
 				orderby_hotentry: 'default',
 				orderby_new: 'default',
-				filterMode: 'recommend',
+				filterMode: {
+					new: 'none',
+					hotentry: 'none'
+				},
 				filterParams: {
-					score: null,
-					bookmarkCount: null,
-					scoreBookmarkRato: null
+					new: {
+						isBookmarkCountEnable: false,
+						isScoreEnable: false,
+						isScoreBookmarkRatoEnable: false,
+						score: null,
+						bookmarkCount: null,
+						scoreBookmarkRato: null
+					},
+					hotentry: {
+						isBookmarkCountEnable: false,
+						isScoreEnable: false,
+						isScoreBookmarkRatoEnable: false,
+						score: null,
+						bookmarkCount: null,
+						scoreBookmarkRato: null
+					}
 				}
 			}),
 			isLoading: true
@@ -58,7 +74,8 @@ export default class Feed extends React.Component{
 	}
 
 	_getRss(mode){
-		if(_.isEmpty(this.sortedFeeds[mode][this.state['orderby_' + mode]])){
+		var orderby = this.state.setting['orderby_' + mode];
+		if(_.isEmpty(this.sortedFeeds[mode][orderby])){
 			this.setState({
 				isLoading: true
 			});
@@ -73,13 +90,13 @@ export default class Feed extends React.Component{
 			})
 			.then((res) =>{
 				this.setState({
-					feed: this.sortFeeds(res, this.state['orderby_' + mode]),
+					feed: this.sortFeeds(res, orderby),
 					isLoading: false
 				});
 			});
 		}else{
 			this.setState({
-				feed: this.sortedFeeds[mode][this.state['orderby_' + mode]],
+				feed: this.sortedFeeds[mode][orderby],
 				isLoading: false
 			});
 		}
@@ -113,7 +130,7 @@ export default class Feed extends React.Component{
 			score: score
 		}));
 		if(this.feedCache.length === this.state.feed.length){
-			this.setSortedFeed(this.feedCache, this.state['orderby_' + this.props.route.mode]);
+			this.setSortedFeed(this.feedCache, this.state.setting['orderby_' + this.props.route.mode]);
 			this.feedCache = [];
 		}
 	}
@@ -172,71 +189,95 @@ export default class Feed extends React.Component{
 		return result;
 	}
 
-	setSortedFeed(feed, orderby, setWith = {}){
+	setSortedFeed(feed, orderby){
 		var result = this.sortFeeds(feed, orderby);
 		this.sortedFeeds[this.props.route.mode][orderby] = result;
-		var newState = {
+		this.setState({
 			feed: result
-		};
-		newState['orderby_' + this.props.route.mode] = orderby;
-		newState = _.defaultsDeep(newState, setWith);
-		this.setState(newState);
-		this.setting.save('orderby_' + this.props.route.mode, orderby);
-		ga && ga('send', 'event', 'Header UI', 'Sort Feed', orderby);
+		});
 	}
 
 	onChangeOrderby(orderby){
 		this.setSortedFeed(this.state.feed, orderby);
+		this.setting.save('orderby_' + this.props.route.mode, orderby, () => {
+			var _obj = {};
+			_obj['orderby_' + this.props.route.mode] = orderby;
+			this.setState({ setting: _.defaultsDeep(_obj, this.state.setting) });
+		});
+		ga && ga('send', 'event', 'Header UI', 'Sort Feed', orderby);
 	}
 
 	onChangeFilterMode(filterMode){
-		this.setting.save('filterMode', filterMode, () => {
-			this.setState({ setting: _.defaultsDeep({filterMode : filterMode}, this.state.setting) });
+		var _obj = {};
+		_obj[this.props.route.mode] = filterMode;
+		_obj = _.defaultsDeep(_obj, this.state.setting.filterMode);
+		this.setting.save('filterMode', _obj, () => {
+			this.setState({ setting: _.defaultsDeep({filterMode : _obj}, this.state.setting) });
 		});
 	}
 
 	onChangeFilterParams(filterParams){
-		this.setting.save('filterParams', filterParams, () => {
-			this.setState({ setting: _.defaultsDeep({filterParams: filterParams}, this.state.setting) });
+		var _obj = {};
+		_obj[this.props.route.mode] = filterParams;
+		_obj = _.defaultsDeep(_obj, this.state.setting.filterParams);
+		this.setting.save('filterParams', _obj, () => {
+			this.setState({ setting: _.defaultsDeep({filterParams: _obj}, this.state.setting) });
 		});
 	}
 
 	filterFeed(feed){
 		var filterFunction = (() => {
-			var result;
-			if(this.state.filterMode === 'recommend'){
-				result = (item) => {
-					if(
-						(item.bookmarkCount > this.recommendFilterParam.bookmarkCount && item.fixed_score / item.bookmarkCount < this.recommendFilterParam.scoreBookmarkRato) ||
-						(item.fixed_score < this.recommendFilterParam.score)
-					){
-						return false;
-					}else{
-						return true;
+			var filterer = false;
+			if(this.state.setting.filterMode[this.props.route.mode] === 'recommend'){
+				let mean = _.meanBy(feed, 'fixed_score');
+				let standardDeviation = 0;
+				_.forEach(feed, (item) => {
+					standardDeviation += Math.pow((item.fixed_score - mean), 2);
+				});
+				standardDeviation = Math.sqrt(standardDeviation / feed.length);
+				if(this.props.route.mode === 'new'){
+					filterer = (item) => {
+						var tScore = ((item.fixed_score - mean) / standardDeviation) * 10 + 50;
+						return 50 <= tScore && 0.5 <= (item.fixed_score / item.bookmarkCount);
+					};
+				}else if(this.props.route.mode === 'hotentry'){
+					filterer = (item) => {
+						var tScore = ((item.fixed_score - mean) / standardDeviation) * 10 + 50;
+						return 40 <= tScore;
+					};
+				}
+				
+			}else if(this.state.setting.filterMode[this.props.route.mode] === 'user'){
+				let bookmarkCount = this.state.setting.filterParams[this.props.route.mode].bookmarkCount;
+				let score = this.state.setting.filterParams[this.props.route.mode].score;
+				let scoreBookmarkRato = this.state.setting.filterParams[this.props.route.mode].scoreBookmarkRato;
+
+				let isBookmarkCountEnable = this.state.setting.filterParams[this.props.route.mode].isBookmarkCountEnable;
+				let isScoreEnable = this.state.setting.filterParams[this.props.route.mode].isScoreEnable;
+				let isScoreBookmarkRatoEnable = this.state.setting.filterParams[this.props.route.mode].isScoreBookmarkRatoEnable;
+
+				bookmarkCount = _.isNumber(bookmarkCount) ? bookmarkCount : -Infinity;
+				score = _.isNumber(score) ? score : -Infinity;
+				scoreBookmarkRato = _.isNumber(scoreBookmarkRato) ? scoreBookmarkRato: -Infinity;
+
+				filterer = (item) => {
+					var hideCondition = false;
+					if(isBookmarkCountEnable){
+						hideCondition = hideCondition || (item.bookmarkCount < bookmarkCount);
 					}
-				};
-			}else if(this.state.filterMode === 'user'){
-				let bookmarkCount = (_.isNumber(this.state.filterParams.bookmarkCount)) ? this.state.filterParams.bookmarkCount : -Infinity;
-				let score = (_.isNumber(this.state.filterParams.score )) ? this.state.filterParams.score : -Infinity;
-				let scoreBookmarkRato = (_.isNumber(this.state.filterParams.scoreBookmarkRato)) ? this.state.filterParams.scoreBookmarkRato : -Infinity;
-				result = (item) => {
-					if(
-						(item.bookmarkCount < bookmarkCount) ||
-						(item.fixed_score < score) ||
-						((item.fixed_score / item.bookmarkCount) < scoreBookmarkRato)
-					){
-						return false;
-					}else{
-						return true;
+					if(isScoreEnable){
+						hideCondition = hideCondition || (item.fixed_score < score);
 					}
+					if(isScoreBookmarkRatoEnable){
+						hideCondition = hideCondition || ((item.fixed_score / item.bookmarkCount) < scoreBookmarkRato);
+					}
+					return !hideCondition;
 				};
-			}else{
-				result = false;
 			}
-			return result;
+			return filterer;
 		})();
 
-		if(_.isFunction(filterFunction)){
+		if(_.isFunction(filterFunction) && !_.isEmpty(feed)){
 			var result = _.filter(feed, filterFunction);
 			if(!result){
 				result = [];
@@ -248,9 +289,14 @@ export default class Feed extends React.Component{
 	}
 
 	render(){
-		var filterdFeed = this.filterFeed(this.state.feed);
-		if(!_.isArray(filterdFeed)){
-			return null;
+		var filterdFeed;
+		if(_.isArray(this.state.feed) && !_.isEmpty(this.state.feed) && this.state.setting.filterMode[this.props.route.mode] !== 'none'){
+			filterdFeed = this.filterFeed(this.state.feed);
+			if(!_.isArray(filterdFeed)){
+				filterdFeed = this.state.feed;
+			}
+		}else{
+			filterdFeed = this.state.feed;
 		}
 		var feedList = filterdFeed.map((item)=>{
 			return (
