@@ -113,7 +113,7 @@ export default class FeedItem extends React.Component{
 					<time className="date" dateTime={this.props.data.date}>{dateString}</time>
 					<div className="category">{this.props.data.category}</div>
 				</div>
-				<div className="title"><a href={this.props.data.link} target="_blank"><img src={siteImgUrl} className="favicon" width="16" height="16" />{this.props.data.title}</a></div>
+				<div className="title"><a href={this.props.data.link} target={this.props.isOpenInNewTabEnable ? '_blank' : ''}><img src={siteImgUrl} className="favicon" width="16" height="16" />{this.props.data.title}</a></div>
 				<div className="text">
 					{entryImage}
 					<div className="description">

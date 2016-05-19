@@ -22,6 +22,7 @@ export default class Feed extends React.Component{
 				viewMode: 'text',
 				orderby_hotentry: 'default',
 				orderby_new: 'default',
+				isOpenInNewTabEnable: true,
 				filterMode: {
 					new: 'none',
 					hotentry: 'none'
@@ -225,6 +226,13 @@ export default class Feed extends React.Component{
 		});
 	}
 
+	onChangeIsOpenInNewTab(){
+		this.setting.save('isOpenInNewTabEnable', !this.state.setting.isOpenInNewTabEnable, () => {
+			this.setState({ setting: _.defaultsDeep({isOpenInNewTabEnable: !this.state.setting.isOpenInNewTabEnable}, this.state.setting) });
+		});
+
+	}
+
 	filterFeed(feed){
 		var filterFunction = (() => {
 			var filterer = false;
@@ -306,6 +314,7 @@ export default class Feed extends React.Component{
 					data={item}
 					mode={this.state.setting.mode}
 					viewMode={this.state.setting.viewMode}
+					isOpenInNewTabEnable={this.state.setting.isOpenInNewTabEnable}
 				/>
 			);
 		});
@@ -320,6 +329,7 @@ export default class Feed extends React.Component{
 					setting={this.state.setting}
 					handleOnChangeFilterMode={this.onChangeFilterMode.bind(this)}
 					handleOnChangeFilterParams={this.onChangeFilterParams.bind(this)}
+					handleOnChangeIsOpenInNewTab={this.onChangeIsOpenInNewTab.bind(this)}
 				/>
 				<div className={'feedList' + (this.state.isLoading ? ' loading' : '')}>
 					<div className="loadingAnime"></div>

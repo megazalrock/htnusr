@@ -56,6 +56,7 @@ h1{
 	color: @btnFontColor;
 	box-sizing: border-box;
 	border: 1px solid rgba(0, 0, 0, 0);
+	user-select: none;
 	/*@keyframes btnSelect{
 		from{
 			box-shadow: @btnShadow;
@@ -121,42 +122,86 @@ h1{
 	}
 	.detailSetting{
 		display: none;
+		padding: @baseMargin;
+		border: 1px solid #CCC;
 		&.visible{
 			display: block;
 		}
-		.userFilterSetting{
-			display: none;
-			&.visible{
-				display: block;
+		.detailSettingItem{
+			margin-bottom: @baseMargin;
+			padding-bottom: @baseMargin;
+			border-bottom: 1px solid #CCC;
+			&:last-child{
+				margin-bottom: 0;
+				padding-bottom: 0;
+				border-bottom: none;
 			}
-			.inputBoxes{
-				display: flex;
-				flex-flow:row wrap;
-				justify-content: flex-start;
-				.inputBox{
-					&.disabled .disableable{
-						opacity: 0.5;
+			.title{
+				line-height: 1;
+				&:before{
+					vertical-align: middle;
+					display: inline-block;
+					content: "";
+					border-left: 5px solid #000;
+					height: 5px;
+					margin-right: 0.5em;
+				}
+			}
+			.contents{
+				margin: @baseMargin 0;
+			}
+			.description{
+				font-size: small;
+				line-height: 1.2;
+				p{
+					margin: 0;
+				}
+			}
+			&.filtering{
+				.contents{
+					margin-bottom: 0;	
+					.filterMode{
+						margin-bottom: @baseMargin;
 					}
-					flex: 0.1 0 auto;
-					label{
-						font-size: small;
-						user-select: none;
-						&.withCheckBox{
-							cursor:pointer;
+					.userFilterSetting{
+						display: none;
+						margin-top: @baseMargin;
+						&.visible{
+							display: block;
 						}
-					}
-					input[type=number]{
-						width: 4em;
-						height:1.2em;
-						margin: 0 0.25em;
-					}
-					input[type=checkbox]{
-						vertical-align: middle;
-						margin-right: 0.5em;
+						.inputBoxes{
+							display: flex;
+							flex-flow:row wrap;
+							justify-content: flex-start;
+							.inputBox{
+								flex: 0.1 1 auto;
+								margin-bottom: @baseMargin;
+								&.disabled .disableable{
+									opacity: 0.5;
+								}
+								label{
+									font-size: small;
+									user-select: none;
+									&.withCheckBox{
+										cursor:pointer;
+									}
+								}
+								input[type=number]{
+									width: 4em;
+									height:1.2em;
+									margin: 0 0.25em;
+								}
+								input[type=checkbox]{
+									vertical-align: middle;
+									margin-right: 0.5em;
+								}
+							}
+						}
 					}
 				}
 			}
 		}
+
 	}
 }
 .feedList{
