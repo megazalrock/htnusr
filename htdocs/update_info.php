@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Tokyo');
 require_once (dirname(__FILE__) . '/../app/lib/CurlWrapper.php');
 $curl = new CurlWrapper();
 $feed = $curl->fetch('http://megazalrock.hatenablog.com/rss/category/bh.mgzl.jp%E3%81%AE%E6%9B%B4%E6%96%B0%E5%B1%A5%E6%AD%B4');
