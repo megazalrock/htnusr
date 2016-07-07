@@ -58,13 +58,14 @@ class Cache {
 	 * @param  string 	$content_type        コンテンツタイプ
 	 * @param  function $nocache_callback    キャッシュがない時のコールバック
 	 * @param  function	$call_back_param_arr コールバックの引数の配列
+	 * @param  boolean	$disable_cache		 キャッシュの強制オフ
 	 * @return [type]
 	 */
-	public function respond($name, $content_type, $nocache_callback, $call_back_param_arr = array()){
+	public function respond($name, $content_type, $nocache_callback, $call_back_param_arr = array(), $disable_cache = false){
 		$cache_file_path = $this->get_cache_file_path($name);
 		$file_time = $this->get_file_time($cache_file_path);
 		header("Content-Type: " . $content_type);
-		if($this->has_cache($name)){
+		if($this->has_cache($name) && !$disable_cache){
 			//$result = file_get_contents($cache_file_path);
 			$is_cache = $file_time;
 			header('X-Mgzl-From-Cache: True');
