@@ -113,6 +113,6 @@ class Cache {
 		}
 
 		unlink($cache_file_path);
-		rename($tmp_file_path, $cache_file_path);
+		copy($tmp_file_path, $cache_file_path);
 	}
 }
