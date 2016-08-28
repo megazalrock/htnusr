@@ -9,6 +9,6 @@ if(empty($type)){
 	die;
 }
 $feed = new Feed();
-$is_local = preg_match('/.+\.otto$/', 'htnuser.otto');
+$is_local = false;//preg_match('/.+\.otto$/', 'htnuser.otto');
 $cache = new Cache(FEED_CACHE_EXPIRES, true, FEED_CACHE_DIR);
 $cache->respond($type, 'application/json; charset=utf-8', array($feed, 'get_feed_json'), array($type, FEED_NUM), $is_local);

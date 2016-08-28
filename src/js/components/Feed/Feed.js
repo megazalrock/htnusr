@@ -63,6 +63,10 @@ export default class Feed extends React.Component{
 				'date': []
 			}
 		};
+		this.lastFeedGetTime = {
+			new: null,
+			hotentry: null
+		};
 	}
 
 	componentWillReceiveProps(nextProp){
@@ -76,7 +80,8 @@ export default class Feed extends React.Component{
 
 	_getRss(mode){
 		var orderby = this.state.setting['orderby_' + mode];
-		if(_.isEmpty(this.sortedFeeds[mode][orderby])){
+		var isOldFeedData = _.isNull(this.lastFeedGetTime[mode]) || (Date.now() - this.lastFeedGetTime[mode]) > (150 * 1000);
+		if(_.isEmpty(this.sortedFeeds[mode][orderby]) || isOldFeedData){
 			this.setState({
 				isLoading: true
 			});
@@ -90,8 +95,11 @@ export default class Feed extends React.Component{
 				ifModified: true
 			})
 			.then((res) =>{
+				var sortedFeedsData = this.sortFeeds(res, orderby);
+				this.sortedFeeds[mode][orderby] = sortedFeedsData;
+				this.lastFeedGetTime[mode] = Date.now();
 				this.setState({
-					feed: this.sortFeeds(res, orderby),
+					feed: sortedFeedsData,
 					isLoading: false
 				});
 			});

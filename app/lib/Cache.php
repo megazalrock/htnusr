@@ -63,23 +63,31 @@ class Cache {
 	 */
 	public function respond($name, $content_type, $nocache_callback, $call_back_param_arr = array(), $disable_cache = false){
 		$cache_file_path = $this->get_cache_file_path($name);
-		$file_time = $this->get_file_time($cache_file_path);
 		header("Content-Type: " . $content_type);
 		if($this->has_cache($name) && !$disable_cache){
 			//$result = file_get_contents($cache_file_path);
-			$is_cache = $file_time;
+			$file_time = $this->get_file_time($cache_file_path);
+			$etag = md5_file($cache_file_path);
+			header('ETag: "' . $etag  . '"');
 			header('X-Mgzl-From-Cache: True');
-			header('Last-Modified: ' . date('r', $file_time));
 			if($this->is_gzip_enabled){
 				header("Content-Encoding: gzip");
 			}
+			if(
+				(isset($_SERVER['HTTP_IF_NONE_MATCH']) && preg_match("/{$etag}/", $_SERVER['HTTP_IF_NONE_MATCH']))
+			){
+				header('HTTP/1.1 304 Not Modified');
+				exit;
+			}
+			$is_cache = $file_time;
 			header('Content-Length: ' . filesize($cache_file_path));
 			readfile($cache_file_path);
 		}else{
 			$is_cache = false;
 			$result = call_user_func_array($nocache_callback, $call_back_param_arr);
-			//$this->save_cache($name, $result);
-			header('Last-Modified: ' . date('r'));
+			$this->save_cache($name, $result);
+			$etag = md5_file($cache_file_path);
+			header('ETag: "' . $etag  . '"');
 			if($this->is_gzip_enabled){
 				ob_start('ob_gzhandler');
 			}
@@ -87,11 +95,16 @@ class Cache {
 			if($this->is_gzip_enabled){
 				ob_end_flush();
 			}
-			$this->save_cache($name, $result);
 		}
 		return $is_cache;
 	}
 
+	/**
+	 * キャッシュファイルを保存
+	 * @param  string  $name       ファイル名
+	 * @param  string  $str        ファイル内容
+	 * @param  boolean $force_gzip 強制的にgzipにするかどうか
+	 */
 	public function save_cache($name, $str, $force_gzip = false){
 		$this->make_cache_dir();
 		$tmp_dir = sys_get_temp_dir();
@@ -111,8 +124,9 @@ class Cache {
 			fwrite($handle, $str);
 			fclose($handle);
 		}
-
-		unlink($cache_file_path);
+		if(file_exists($cache_file_path)){
+			unlink($cache_file_path);
+		}
 		copy($tmp_file_path, $cache_file_path);
 	}
 }
