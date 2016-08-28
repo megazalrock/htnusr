@@ -27,7 +27,7 @@ function get_updateinfo_json(){
 	return json_encode($result);
 }
 
-$is_local = preg_match('/.+\.otto$/', 'htnuser.otto');
+$is_local = preg_match('/.+\.otto$/', $_SERVER['HTTP_HOST']);
 $dirname = 'updateinfo';
 $cache = new Cache(UPDATEINFO_CACHE_EXPIRES, true, UPDATEINFO_CACHE_DIR);
 $cache->respond($dirname, 'application/json; charset=utf-8', 'get_updateinfo_json', array(), $is_local);
