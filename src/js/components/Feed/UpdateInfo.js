@@ -16,7 +16,9 @@ export default class UpdateInfo extends React.Component{
 	_getRss(){
 		$.ajax({
 			url: '/update_info.php',
-			dataType: 'json'
+			dataType: 'json',	
+			cache: true,
+			ifModified: true
 		})
 		.then((res) => {
 			this.setState(res);
