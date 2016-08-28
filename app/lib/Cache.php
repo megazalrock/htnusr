@@ -1,10 +1,10 @@
 <?php
 date_default_timezone_set('Asia/Tokyo');
 class Cache {
-	static public $cache_expires;
-	static private $cache_dir;
-	static private $cache_base_dir;
-	static private $is_gzip_enabled;
+	public $cache_expires;
+	private $cache_dir;
+	private $cache_base_dir;
+	private $is_gzip_enabled;
 
 	public function __construct($expires, $is_gzip_enabled = true, $cache_dir = ''){
 		$this->cache_expires = $expires;

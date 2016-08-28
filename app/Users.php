@@ -6,7 +6,7 @@ require_once (dirname(__FILE__) . '/lib/Cache.php');
 require_once (dirname(__FILE__) . '/Hatena.php');
 class Users extends DataBase{
 	const EXPIRES_UNIXTIME = 604800;//60 * 60 * 24 * 7;
-	public static $statics;
+	public $statics;
 	public function __construct(){
 		parent::__construct();
 		$this->statics = $this->get_statics();
@@ -321,9 +321,12 @@ class Users extends DataBase{
 					$rato = 1;
 				}else{
 					$rato = 1 / sqrt( sqrt(ceil( ($key - 2) / 10 )) );
+				}
 				$score += $user['karma'];
 				$fixed_score += ($user['karma'] * $rato);
 			}
+			//var_dump(array_search('jtw', $users));
+			//$result = ($result[0]);
 			return array(
 				'score' => $score,
 				'fixed_score' => $fixed_score
