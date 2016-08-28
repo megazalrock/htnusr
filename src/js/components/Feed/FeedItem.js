@@ -15,7 +15,8 @@ export default class FeedItem extends React.Component{
 	}
 
 	render(){
-		var bookmarkUrl = 'http://b.hatena.ne.jp/entry/' + (this.props.data.link.match(/^https/) ? 's/' : '') + this.props.data.link.replace(/^https?:\/\//, '');
+		var path = ((this.props.data.link.match(/^https/) ? 's/' : '') + this.props.data.link.replace(/^https?:\/\//, '')).replace('#', '%23');
+		var bookmarkUrl = 'http://b.hatena.ne.jp/entry/' + path;
 		var scoreColor;
 		var scoreSaturation = Math.abs(this.props.data.fixed_score);
 		var s = 0;

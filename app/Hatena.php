@@ -135,7 +135,7 @@ class HatenaAPI{
 		return $result;
 	}
 
-	public function fetch_bookmark_info($url){
+	public static function fetch_bookmark_info($url){
 		$curl = new CurlWrapper();
 		$result = json_decode( $curl->fetch(sprintf(self::HATEB_API, rawurlencode($url))), true );
 		if($curl->is_ok()){

@@ -282,7 +282,7 @@ Class Feed extends DataBase{
 	public function get_url_score($link){
 		$users = new Users();
 		$bookmark_info = HatenaAPI::fetch_bookmark_info($link);
-		$scores = array(
+		$karmas = array(
 			'score' => null,
 			'fixed_score' => null,
 		);
@@ -294,25 +294,20 @@ Class Feed extends DataBase{
 				foreach ($bookmark_info['bookmarks'] as $bookmark) {
 					$user_list[] = $bookmark['user'];
 				}
-				$scores = $users->get_karma_sum($user_list, 0, $bookmark_info['count']);
+				$karmas = $users->get_karma_sum($user_list, 0, $bookmark_info['count']);
+				$karmas['fixed_score'] = $karmas['fixed_score'] * (count($bookmark_info['bookmarks']) / $bookmark_info['count']);
 			}else{
-				$scores = array(
+				$karmas = array(
 					'score' => null,
 					'fixed_score' => null,
 				);
 			}
-		}else{
-			$bookmarkCount = null;
-			$scores = array(
-				'score' => null,
-				'fixed_score' => null,
-			);
 		}
 		return array(
 			'bookmark_info' => $bookmark_info,
 			'bookmarkCount' => $bookmarkCount,
-			'score' => $scores['score'],
-			'fixed_score'=> $scores['fixed_score']
+			'score' => $karmas['score'],
+			'fixed_score'=> $karmas['fixed_score']
 		);
 	}
 
