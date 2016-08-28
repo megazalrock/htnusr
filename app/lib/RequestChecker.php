@@ -3,4 +3,4 @@ if($_SERVER['HTTP_HOST'] != 'htnusr.otto' && !isset($_SERVER['HTTP_X_REQUESTED_W
 	header('HTTP', true, 403);
 	die();
 }
-var_dump('RequestChecker is disabled');
+header('X-Mgzl-Request-Checker: disabled');
