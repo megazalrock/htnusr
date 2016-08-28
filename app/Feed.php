@@ -295,6 +295,7 @@ Class Feed extends DataBase{
 					$user_list[] = $bookmark['user'];
 				}
 				$karmas = $users->get_karma_sum($user_list, 0, $bookmark_info['count']);
+				$karmas['fixed_score'] = $karmas['fixed_score'] * (count($bookmark_info['bookmarks']) / $bookmark_info['count']);
 			}else{
 				$karmas = array(
 					'score' => null,
@@ -305,8 +306,8 @@ Class Feed extends DataBase{
 		return array(
 			'bookmark_info' => $bookmark_info,
 			'bookmarkCount' => $bookmarkCount,
-			'score' => $scores['score'],
-			'fixed_score'=> $scores['fixed_score']
+			'score' => $karmas['score'],
+			'fixed_score'=> $karmas['fixed_score']
 		);
 	}
 
